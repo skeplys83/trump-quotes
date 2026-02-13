@@ -35,9 +35,9 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts",
-    "lib/weather.js",
-    "app/pagexd.jsx",
-    "app/layout.jsx"
+    "src/lib/weather.js",
+    "src/app/pagexd.jsx",
+    "src/app/layout.jsx"
   ],
   "exclude": [
     "node_modules"

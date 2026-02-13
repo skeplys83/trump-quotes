@@ -6,25 +6,42 @@ import { Input } from './shadcn/input'
 import { toast } from 'sonner'
 import { Skeleton } from './shadcn/skeleton'
 import WeatherWidget from './WeatherWidget'
+import { useSession } from 'next-auth/react'
 
-export default function SearchBox() {
+export default function SearchBox({ loginOpen, setLoginOpen }: { loginOpen: boolean, setLoginOpen: (open: boolean) => void }) {
   const [city, setCity] = useState('')
+  const session = useSession();
 
   const { data, error, isLoading } = useSWR(
     city ? `/api/weather/${city}` : null,
     async (url) => {
       const res = await fetch(url)
-      if (!res.ok) throw new Error('Request Failed')
-      return res.json()
+      if (res.ok) return res.json()
+      throw Object.assign(new Error('Request Failed'), { status: res.status })
     }
   )
 
   useEffect(() => {
-    toast.error(`could not get info for ${city}`)
-  }, [error])
+    if (!error) return
+    const status = (error as Error & { status?: number }).status
+    if (status === 429) {
+      toast.error("Slow down a little..")
+      return
+    }
+    if (status === 404) {
+      toast.error(`City "${city}" not found`)
+      return
+    }
+    toast.error(`Error fetching weather data for ${city}`)
+  }, [error, city])
 
   const handleInput = (e) => {
     if (e.key !== "Enter") return
+    if(session.status !== "authenticated") {
+      setLoginOpen(true)
+      return
+    }
+
     const cityValue = e.target.value.trim()
     if (cityValue) {
       setCity(cityValue)
