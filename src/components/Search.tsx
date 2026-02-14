@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import useSWR from 'swr'
+import axios from 'axios'
 import { Input } from './shadcn/input'
 import { toast } from 'sonner'
 import { Skeleton } from './shadcn/skeleton'
@@ -15,15 +16,14 @@ export default function SearchBox({ loginOpen, setLoginOpen }: { loginOpen: bool
   const { data, error, isLoading } = useSWR(
     city ? `/api/weather/${city}` : null,
     async (url) => {
-      const res = await fetch(url)
-      if (res.ok) return res.json()
-      throw Object.assign(new Error('Request Failed'), { status: res.status })
+      const res = await axios.get(url)
+      return res.data
     }
   )
 
   useEffect(() => {
     if (!error) return
-    const status = (error as Error & { status?: number }).status
+    const status = error.response?.status
     if (status === 429) {
       toast.error("Slow down a little..")
       return
