@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "@/src/components/shadcn/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./shadcn/dialog";
 import { useState } from "react";
