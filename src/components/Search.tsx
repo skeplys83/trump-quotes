@@ -8,12 +8,11 @@ import { toast } from 'sonner'
 import { Skeleton } from './shadcn/skeleton'
 import WeatherWidget from './WeatherWidget'
 import { useRouter } from 'next/navigation'
-import { createSupabaseBrowser } from '../lib/supabase/client'
+import { useSessionContext } from '../lib/supabase/SupabaseSessionContext'
 
-export default async function SearchBox() {
+export default function SearchBox() {
   const [city, setCity] = useState('')
-    const supabase = createSupabaseBrowser();
-    const session = await supabase.auth.getSession();
+  const { user } = useSessionContext();
   const router = useRouter();
 
   const { data, error, isLoading } = useSWR(
@@ -40,7 +39,7 @@ export default async function SearchBox() {
 
   const handleInput = (e) => {
     if (e.key !== "Enter") return
-    if(!session?.data?.session?.user) {
+    if(!user) {
       router.push('/?login=true')
       return
     }

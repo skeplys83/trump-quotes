@@ -6,15 +6,13 @@ import { LoginForm } from "./loginForm";
 import { Avatar, AvatarFallback, AvatarImage } from "./shadcn/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./shadcn/dropdown-menu";
 import Link from "next/link";
-import { createSupabaseBrowser } from "../lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { useSessionContext } from "../lib/supabase/SupabaseSessionContext";
 
 export default function Header({ loginOpen, setLoginOpen }: { loginOpen: boolean, setLoginOpen: (open: boolean) => void }) {
-    const supabase = createSupabaseBrowser();
-    const session = await supabase.auth.getSession();
+    const { supabase, user } = useSessionContext();
     const router = useRouter();
-    
-    const user = session?.data?.session?.user || null;
+
     const userEmail = user?.email || "unknown";
     const userName =
         user?.user_metadata?.full_name ||
@@ -85,7 +83,7 @@ export default function Header({ loginOpen, setLoginOpen }: { loginOpen: boolean
                             </DropdownMenuContent>
                         </DropdownMenu>
                     ) : (
-                        <Dialog open={loginOpen}>
+                        <Dialog open={loginOpen} onOpenChange={setLoginOpen}>
                             <DialogTrigger asChild>
                                 <Button className='rounded-full px-4 py-2 h-10 cursor-pointer' onClick={() => router.push('/?login=true')}>Sign In</Button>
                             </DialogTrigger>

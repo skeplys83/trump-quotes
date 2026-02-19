@@ -1,3 +1,5 @@
+"use client"
+
 import { cn } from "@/src/lib/utils"
 import { Button } from "@/src/components/shadcn/button"
 import {
@@ -12,15 +14,13 @@ import {
   FieldDescription,
   FieldGroup,
 } from "@/src/components/shadcn/field"
-import { useMemo } from "react";
-import { createSupabaseBrowser } from "../lib/supabase/client";
+import { useSessionContext } from "../lib/supabase/SupabaseSessionContext";
 
-export async function LoginForm({
+export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-    const supabase = createSupabaseBrowser();
-    const session = await supabase.auth.getSession();
+    const { supabase } = useSessionContext();
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
