@@ -7,11 +7,14 @@ import { Input } from './shadcn/input'
 import { toast } from 'sonner'
 import { Skeleton } from './shadcn/skeleton'
 import WeatherWidget from './WeatherWidget'
-import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { createSupabaseBrowser } from '../lib/supabase/client'
 
-export default function SearchBox({ loginOpen, setLoginOpen }: { loginOpen: boolean, setLoginOpen: (open: boolean) => void }) {
+export default async function SearchBox() {
   const [city, setCity] = useState('')
-  const session = useSession();
+    const supabase = createSupabaseBrowser();
+    const session = await supabase.auth.getSession();
+  const router = useRouter();
 
   const { data, error, isLoading } = useSWR(
     city ? `/api/weather/${city}` : null,
@@ -37,8 +40,8 @@ export default function SearchBox({ loginOpen, setLoginOpen }: { loginOpen: bool
 
   const handleInput = (e) => {
     if (e.key !== "Enter") return
-    if(session.status !== "authenticated") {
-      setLoginOpen(true)
+    if(!session?.data?.session?.user) {
+      router.push('/?login=true')
       return
     }
 
