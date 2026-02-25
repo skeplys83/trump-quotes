@@ -1,22 +1,61 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
+import { createSupabaseServer } from "@/src/lib/supabase/supabaseServer";
+import { createSupabaseAdmin } from "@/src/lib/supabase/supabaseAdmin";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {});
 
 export async function POST(req: Request) {
-  const { priceId } = await req.json();
-
   const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${appUrl}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${appUrl}/billing/cancel`,
-    
-    // Optional but recommended once you have auth/users:
-    // customer_email, or customer, or client_reference_id
-    // and metadata to link Stripe -> your user id
+
+  // Get the current user from Supabase
+  const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const existingStripeCustomer = await stripe.customers.search({
+    query: `metadata['supabase_user_id']:'${user.id}'`,
   });
 
-  return NextResponse.json({ url: session.url });
+  let customer: Stripe.Customer;
+
+  if (existingStripeCustomer.data.length > 0) {
+    customer = existingStripeCustomer.data[0];
+  } else {
+    customer = await stripe.customers.create({
+      email: user.email,
+      metadata: {
+        supabase_user_id: user.id,
+      },
+    });
+  }
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    line_items: [{ price: process.env.STRIPE_WEATHER_PRICE_ID!, quantity: 1 }],
+    success_url: `${appUrl}/processing`,
+    cancel_url: `${appUrl}/billing/cancel`,
+    customer: customer.id,
+  });
+
+  // Create subscription entry in database with "incomplete" status
+  const supabaseAdmin = createSupabaseAdmin();
+  await supabaseAdmin
+    .from("weather-subscriptions")
+    .upsert(
+      {
+        customer_id: user.id,
+        stripe_subscription_id: session.subscription as string,
+        subscription_status: "incomplete",
+        current_period_end: null,
+      },
+      {
+        onConflict: "customer_id",
+      }
+    );
+
+  return NextResponse.redirect(session.url!, { status: 303 });
 }

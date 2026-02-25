@@ -14,13 +14,13 @@ import {
   FieldDescription,
   FieldGroup,
 } from "@/src/components/shadcn/field"
-import { useSessionContext } from "../lib/supabase/SupabaseSessionContext";
+import { useSessionContext } from "@/src/lib/supabase/SupabaseSessionContext"
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-    const { supabase } = useSessionContext();
+  const { supabase } = useSessionContext();
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>

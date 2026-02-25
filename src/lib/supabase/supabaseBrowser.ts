@@ -1,5 +1,8 @@
+"use client"
+
 import { createBrowserClient } from '@supabase/ssr'
-import { SupabaseClient } from '@supabase/supabase-js';
+import { Session, SupabaseClient, User } from '@supabase/supabase-js';
+import { useContext, useEffect, useMemo, useState, createContext } from 'react';
 
 let supabaseInstance: ReturnType<typeof createBrowserClient> | null = null;
 

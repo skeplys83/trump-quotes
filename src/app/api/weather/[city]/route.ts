@@ -1,11 +1,11 @@
-import { createSupabaseServer } from "@/src/lib/supabase/server";
+import { createSupabaseServer } from "@/src/lib/supabase/supabaseServer";
 import { unstable_noStore } from "next/cache";
 import { NextResponse } from "next/server"
 
 export async function GET(req, { params }) {
     unstable_noStore();
     const { city } = await params
-    
+
     const supabase = await createSupabaseServer();
     const { data: { user } } = await supabase.auth.getUser();
 

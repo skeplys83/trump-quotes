@@ -7,13 +7,12 @@ import { Input } from './shadcn/input'
 import { toast } from 'sonner'
 import { Skeleton } from './shadcn/skeleton'
 import WeatherWidget from './WeatherWidget'
-import { useRouter } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { useSessionContext } from '../lib/supabase/SupabaseSessionContext'
 
 export default function SearchBox() {
   const [city, setCity] = useState('')
   const { user } = useSessionContext();
-  const router = useRouter();
 
   const { data, error, isLoading } = useSWR(
     city ? `/api/weather/${city}` : null,
@@ -39,9 +38,8 @@ export default function SearchBox() {
 
   const handleInput = (e) => {
     if (e.key !== "Enter") return
-    if(!user) {
-      router.push('/?login=true')
-      return
+    if (!user) {
+      redirect('/login')
     }
 
     const cityValue = e.target.value.trim()
