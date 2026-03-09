@@ -13,9 +13,9 @@ export default function ProcessingPage() {
             try {
                 const response = await axios.get("/api/subscription");
 
-                // If subscription is active, redirect to plans
-                if (response.data && response.data.subscription_status === "active") {
-                    router.push("/plans");
+                // If subscription is active, redirect to home page
+                if (response.data && response.data.stripe_subscription_id !== null) {
+                    router.push("/");
                 }
 
                 // If subscription doesn't exist (deleted/canceled), also redirect
