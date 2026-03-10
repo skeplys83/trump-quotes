@@ -23,7 +23,7 @@ interface Subscription {
 const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 
 export default function SubscriptionButton() {
-  const { data: subscription, isLoading } = useSWR<Subscription | null>(
+  const { data: subscription, isLoading, error } = useSWR<Subscription | null>(
     "/api/subscription",
     fetcher
   );

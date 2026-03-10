@@ -1,9 +1,11 @@
 import { createSupabaseServer } from "@/src/lib/supabase/supabaseServer";
 import { createSupabaseAdmin } from "@/src/lib/supabase/supabaseAdmin";
 import { NextResponse } from "next/server";
+import Stripe from "stripe";
 
 export async function GET() {
     try {
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {});
         const supabase = await createSupabaseServer();
         const {
             data: { user },
@@ -14,7 +16,7 @@ export async function GET() {
         }
 
         const supabaseAdmin = createSupabaseAdmin();
-        const { data, error } = await supabaseAdmin
+        let { data, error } = await supabaseAdmin
             .from("weather-subscriptions")
             .select("*")
             .eq("customer_id", user.id)
@@ -22,6 +24,29 @@ export async function GET() {
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
+        if (!data) {
+            return NextResponse.json(null);
+        }
+
+        if (!data.stripe_subscription_id) {
+            return NextResponse.json(data);
+        }
+
+        const res = await stripe.subscriptions.retrieve(data.stripe_subscription_id);
+
+        if (res.status === "canceled" || res.status === "incomplete_expired") {
+            const { error: deleteError } = await supabaseAdmin
+                .from("weather-subscriptions")
+                .delete()
+                .eq("customer_id", user.id);
+
+            if (deleteError) {
+                return NextResponse.json({ error: deleteError.message }, { status: 500 });
+            }
+
+            console.log("found canceled subscription, deleting from database for user:", user.id);
         }
 
         return NextResponse.json(data);

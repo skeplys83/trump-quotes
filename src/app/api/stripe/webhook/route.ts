@@ -32,12 +32,18 @@ export async function POST(req: Request) {
                     throw new Error("No supabase_user_id found in Stripe customer metadata");
                 }
 
+                const nextPeriodEnd = subscription.items.data[0]?.current_period_end;
+
+                if (!nextPeriodEnd) {
+                    throw new Error("No current_period_end found on subscription items");
+                }
+
                 const { error } = await supabase
                     .from("weather-subscriptions")
                     .update({
                         stripe_subscription_id: subscription.id,
                         subscription_status: "active",
-                        current_period_end: new Date(subscription.billing_cycle_anchor * 1000).toISOString(),
+                        current_period_end: new Date(nextPeriodEnd * 1000).toISOString(),
                     })
                     .eq("customer_id", userId);
 
