@@ -1,12 +1,19 @@
 "use client"
 
 import { LoaderIcon } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { Button } from "@/src/components/shadcn/button";
 
 export default function ProcessingPage() {
     const router = useRouter();
+    const [showFallback, setShowFallback] = useState(false);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => setShowFallback(true), 10000);
+        return () => clearTimeout(timeout);
+    }, []);
 
     useEffect(() => {
         const checkSubscription = async () => {
@@ -39,8 +46,20 @@ export default function ProcessingPage() {
     }, [router]);
 
     return (
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4">
             <LoaderIcon className="animate-spin w-6 h-6" />
+            {showFallback && (
+                <>
+                    <p className="text-sm text-muted-foreground mt-5">Not loading? Return to plans</p>
+                    <Button
+                        variant="outline"
+                        onClick={() => router.push("/plans")}
+                        className="rounded-full px-4 py-2 h-10 cursor-pointer"
+                    >
+                        Go to Plans
+                    </Button>
+                </>
+            )}
         </div>
     );
 }
