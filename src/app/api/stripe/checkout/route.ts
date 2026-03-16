@@ -5,7 +5,7 @@ import { createSupabaseAdmin } from "@/src/lib/supabase/supabaseAdmin";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {});
 
-export async function POST(req: Request) {
+export async function POST() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
 
   // Get the current user from Supabase

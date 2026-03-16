@@ -2,7 +2,7 @@ import { createSupabaseServer } from "@/src/lib/supabase/supabaseServer";
 import { unstable_noStore } from "next/cache";
 import { NextResponse } from "next/server"
 
-export async function GET(req, { params }) {
+export async function GET(_req: Request, { params }) {
     unstable_noStore();
     const { city } = await params
 

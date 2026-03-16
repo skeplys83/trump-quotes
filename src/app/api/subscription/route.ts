@@ -16,7 +16,7 @@ export async function GET() {
         }
 
         const supabaseAdmin = createSupabaseAdmin();
-        let { data, error } = await supabaseAdmin
+        const { data, error } = await supabaseAdmin
             .from("weather-subscriptions")
             .select("*")
             .eq("customer_id", user.id)

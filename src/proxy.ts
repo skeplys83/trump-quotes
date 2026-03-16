@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createSupabaseServer } from './lib/supabase/supabaseServer'
-import { redirect } from 'next/navigation'
 
 export async function proxy(request: NextRequest) {
   const supabase = await createSupabaseServer();

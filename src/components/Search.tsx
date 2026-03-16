@@ -1,17 +1,18 @@
 "use client"
 
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import axios from 'axios'
 import { Input } from './shadcn/input'
 import { toast } from 'sonner'
 import { Skeleton } from './shadcn/skeleton'
 import WeatherWidget from './WeatherWidget'
-import { redirect } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useSessionContext } from '../lib/supabase/SupabaseSessionContext'
 
 export default function SearchBox() {
   const [city, setCity] = useState('')
+  const router = useRouter()
   const { user } = useSessionContext();
 
   const { data, error, isLoading } = useSWR(
@@ -36,10 +37,18 @@ export default function SearchBox() {
     toast.error(`Error fetching weather data for ${city}`)
   }, [error, city])
 
-  const handleInput = (e) => {
+  const handleInput = async (e) => {
     if (e.key !== "Enter") return
     if (!user) {
-      redirect('/login')
+      router.push('/login')
+      return
+    }
+
+    const response = await axios.get("/api/subscription")
+
+    if (!response.data || response.data.subscription_status !== "active") {
+      router.push('/plans')
+      return
     }
 
     const cityValue = e.target.value.trim()

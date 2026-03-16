@@ -23,7 +23,7 @@ interface Subscription {
 const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 
 export default function SubscriptionButton() {
-  const { data: subscription, isLoading, error } = useSWR<Subscription | null>(
+  const { data: subscription, isLoading } = useSWR<Subscription | null>(
     "/api/subscription",
     fetcher
   );
@@ -68,7 +68,7 @@ export default function SubscriptionButton() {
             <DialogHeader>
               <DialogTitle>Are you sure?</DialogTitle>
               <DialogDescription>
-                This will cancel your subscription. You'll still have access until the end of your current billing period.
+                This will cancel your subscription. You&apos;ll still have access until the end of your current billing period.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
