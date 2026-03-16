@@ -1,27 +1,36 @@
-"use server"
+"use client"
 
 import Link from "next/link";
-import { createSupabaseServer } from "@/src/lib/supabase/supabaseServer";
-import { createSupabaseAdmin } from "@/src/lib/supabase/supabaseAdmin";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-export default async function LogoSection() {
-    const supabase = await createSupabaseServer();
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+type SubscriptionResponse = {
+    subscription_status?: string;
+} | null;
 
-    let isPro = false;
+export default function LogoSection() {
+    const [isPro, setIsPro] = useState(false);
 
-    if (user) {
-        const supabaseAdmin = createSupabaseAdmin();
-        const { data } = await supabaseAdmin
-            .from("weather-subscriptions")
-            .select("subscription_status")
-            .eq("customer_id", user.id)
-            .maybeSingle();
+    useEffect(() => {
+        let isMounted = true;
 
-        isPro = data?.subscription_status === "active";
-    }
+        const fetchSubscription = async () => {
+            try {
+                const response = await axios.get<SubscriptionResponse>("/api/subscription");
+                if (!isMounted) return;
+                setIsPro(response.data?.subscription_status === "active");
+            } catch {
+                if (!isMounted) return;
+                setIsPro(false);
+            }
+        };
+
+        fetchSubscription();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     return (
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">

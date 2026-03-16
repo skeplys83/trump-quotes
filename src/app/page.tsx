@@ -1,7 +1,7 @@
 "use server"
 
 import Header from "@/src/app/Header";
-import Search from "@/src/app/Search";
+import Search from "@/src/app/SearchField";
 
 export default async function Page() {
   return (

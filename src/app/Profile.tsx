@@ -1,10 +1,10 @@
 "use client"
 
 import { Button } from "@/src/components/shadcn/button";
-import { Avatar, AvatarFallback, AvatarImage } from "./shadcn/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./shadcn/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/src/components/shadcn/dropdown-menu";
 import { useSessionContext } from "../lib/supabase/SupabaseSessionContext";
 import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "../components/shadcn/avatar";
 
 export default function Profile() {
     const { supabase, user } = useSessionContext();
@@ -65,6 +65,7 @@ export default function Profile() {
                     onSelect={async (event) => {
                         event.preventDefault();
                         await supabase.auth.signOut();
+                        window.location.href = '/';
                     }}
                 >
                     Logout
