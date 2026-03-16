@@ -1,7 +1,7 @@
 "use server"
 
-import Header from "@/src/components/Header";
-import Search from "@/src/components/Search";
+import Header from "@/src/app/Header";
+import Search from "@/src/app/Search";
 
 export default async function Page() {
   return (
