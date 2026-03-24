@@ -8,23 +8,15 @@ import { toast } from 'sonner'
 import { LoaderIcon } from 'lucide-react'
 import WeatherWidget from './WeatherWidget'
 import { useRouter } from 'next/navigation'
-import { useSessionContext } from '../lib/supabase/SupabaseSessionContext'
 
 export default function SearchBox() {
   const [city, setCity] = useState('')
   const router = useRouter()
-  const { user } = useSessionContext();
 
   const { data, error, isLoading } = useSWR(
     city ? `/api/weather/${city}` : null,
     async (url) => {
       const response = await axios.get("/api/subscription")
-
-      if (!response.data || response.data.subscription_status !== "active") {
-        router.push('/plans')
-        return
-      }
-
       const res = await axios.get(url)
       return res.data
     }
@@ -33,12 +25,20 @@ export default function SearchBox() {
   useEffect(() => {
     if (!error) return
     const status = error.response?.status
-    if (status === 429) {
-      toast.error("Slow down a little..")
+    if (status === 401) {
+      router.push('/login')
+      return
+    }
+    if (status === 402) {
+      router.push('/plans')
       return
     }
     if (status === 404) {
       toast.error(`City "${city}" not found`)
+      return
+    }
+    if (status === 429) {
+      toast.error("Slow down a little..")
       return
     }
     toast.error(`Error fetching weather data for ${city}`)
@@ -46,11 +46,6 @@ export default function SearchBox() {
 
   const handleInput = async (e) => {
     if (e.key !== "Enter") return
-    if (!user) {
-      router.push('/login')
-      return
-    }
-
     const cityValue = e.target.value.trim()
     if (cityValue) {
       setCity(cityValue)

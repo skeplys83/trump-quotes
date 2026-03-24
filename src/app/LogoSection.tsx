@@ -1,35 +1,24 @@
 "use client"
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 
-type SubscriptionResponse = {
-    subscription_status?: string;
-} | null;
 
 export default function LogoSection() {
     const [isPro, setIsPro] = useState(false);
 
     useEffect(() => {
-        let isMounted = true;
-
         const fetchSubscription = async () => {
             try {
-                const response = await axios.get<SubscriptionResponse>("/api/subscription");
-                if (!isMounted) return;
+                const response = await axios.get("/api/subscription");
                 setIsPro(response.data?.subscription_status === "active");
             } catch {
-                if (!isMounted) return;
                 setIsPro(false);
             }
         };
 
         fetchSubscription();
-
-        return () => {
-            isMounted = false;
-        };
     }, []);
 
     return (

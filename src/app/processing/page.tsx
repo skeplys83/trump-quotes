@@ -25,7 +25,7 @@ export default function ProcessingPage() {
                     router.push("/");
                 }
 
-                // If subscription doesn't exist (deleted/canceled), also redirect
+                // If subscription doesn't exist (deleted/canceled), go back to plans page
                 if (!response.data) {
                     router.push("/plans");
                 }

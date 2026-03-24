@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Next.js: run and debug full stack",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "npm run dev",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "killOnServerStop": true,
+                "pattern": "- Local:.+(https?://.+)",
+                "uriFormat": "%s"
+            }
+        }
+    ]
+}
