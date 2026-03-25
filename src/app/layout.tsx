@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { SupabaseSessionProvider } from "../lib/supabase/SupabaseSessionProvider";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,7 +32,8 @@ export default function RootLayout({
       >
         <SupabaseSessionProvider>
           {children}
-          <Toaster></Toaster>
+          <Toaster />
+          <SpeedInsights />
         </SupabaseSessionProvider>
       </body>
     </html>
