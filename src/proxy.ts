@@ -12,5 +12,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/login'],
+  matcher: [
+    '/((?!api/stripe/webhook|_next/static|_next/image|favicon.ico).*)',
+    '/',
+    '/login'
+  ],
 }
