@@ -18,7 +18,9 @@ export default function ProcessingPage() {
     useEffect(() => {
         const checkSubscription = async () => {
             try {
-                const response = await axios.get("/api/subscription");
+                const response = await axios.get("/api/subscription", {
+                    withCredentials: true,
+                });
 
                 // If subscription is active, redirect to home page
                 if (response.data && response.data.stripe_subscription_id !== null) {
