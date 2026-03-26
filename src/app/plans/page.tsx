@@ -19,12 +19,14 @@ export default async function PlansPage() {
       <div className="flex-1 flex items-start justify-center px-6 py-40">
         <div className="max-w-2xl w-full">
           <div className="text-center mb-16">
-            <h1 className="text-4xl font-bold mb-4">Access the weather anytime, everywhere</h1>
+            <h1 className="text-4xl font-bold mb-4">
+              Access Next Weather <span className="bg-linear-to-r from-violet-400 to-violet-600 bg-clip-text text-transparent">Pro</span>
+            </h1>
           </div>
 
           <Card className="bg-background border rounded-lg shadow-lg">
             <CardHeader>
-              <CardTitle className="text-2xl">Default Plan</CardTitle>
+              <CardTitle className="text-2xl ">Next Weather Pro</CardTitle>
               <CardDescription>Monthly billing</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">

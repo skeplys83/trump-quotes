@@ -13,7 +13,11 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
-    console.log("stripe webhook event: " + event.type);
+    console.log("Stripe webhook event received", {
+        type: event.type,
+        id: event.id,
+        data: event.data.object,
+    });
 
     try {
         switch (event.type) {
