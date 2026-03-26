@@ -33,7 +33,7 @@ export async function POST() {
         // Cancel the subscription in Stripe (webhook will handle database deletion)
         await stripe.subscriptions.cancel(subscription.stripe_subscription_id);
 
-        return NextResponse.redirect(new URL("/processing", process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"));
+        return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_APP_URL}/processing`));
     } catch (error) {
         console.error("Subscription cancellation error:", error);
         return NextResponse.json(
