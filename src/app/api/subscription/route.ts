@@ -5,6 +5,10 @@ import Stripe from "stripe";
 
 //export const runtime = "nodejs";
 
+export async function OPTIONS() {
+    return NextResponse.json({}, { status: 200 });
+}
+
 export async function GET() {
     try {
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {});

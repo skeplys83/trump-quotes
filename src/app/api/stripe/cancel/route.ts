@@ -3,6 +3,10 @@ import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/src/lib/supabase/supabaseServer";
 import { createSupabaseAdmin } from "@/src/lib/supabase/supabaseAdmin";
 
+export async function OPTIONS() {
+    return NextResponse.json({}, { status: 200 });
+}
+
 export async function POST() {
     try {
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {});
