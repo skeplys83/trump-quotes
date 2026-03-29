@@ -6,7 +6,6 @@ import { createSupabaseAdmin } from "@/src/lib/supabase/supabaseAdmin";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {});
 
 export async function POST() {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
 
   // Get the current user from Supabase
   const supabase = await createSupabaseServer();
@@ -36,8 +35,8 @@ export async function POST() {
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     line_items: [{ price: process.env.STRIPE_WEATHER_PRICE_ID!, quantity: 1 }],
-    success_url: `${appUrl}/processing`,
-    cancel_url: `${appUrl}/billing/cancel`,
+    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/processing`,
+    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/billing/cancel`,
     customer: customer.id,
   });
 
