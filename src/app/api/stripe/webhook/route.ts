@@ -2,14 +2,38 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/src/lib/supabase/supabaseAdmin";
 import Stripe from "stripe";
-import stripe from "stripe";
 
 export async function POST(req: Request) {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {});
-    const supabase = await createSupabaseAdmin();
-    const event: Stripe.Event | null = await stripeWebhookEvent(await req.text(), (await headers()).get("stripe-signature"), process.env.STRIPE_WEBHOOK_SECRET);
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    const requestBody = await req.text();
+    const requestHeaders = await headers();
+    const stripeSignature = requestHeaders.get("stripe-signature");
 
-    if (!event) {
+    if (!stripeSecretKey) {
+        return NextResponse.json({ error: "Missing STRIPE_SECRET_KEY" }, { status: 500 });
+    }
+
+    if (!webhookSecret) {
+        return NextResponse.json({ error: "Missing STRIPE_WEBHOOK_SECRET" }, { status: 500 });
+    }
+
+    if (!stripeSignature) {
+        return NextResponse.json({ error: "Missing stripe-signature header" }, { status: 400 });
+    }
+
+    if (!requestBody) {
+        return NextResponse.json({ error: "Missing request body" }, { status: 400 });
+    }
+
+    const stripe = new Stripe(stripeSecretKey, {});
+    const supabase = await createSupabaseAdmin();
+    let event: Stripe.Event;
+
+    try {
+        event = stripe.webhooks.constructEvent(requestBody, stripeSignature, webhookSecret);
+    } catch (err) {
+        console.error("Stripe signature verification failed:", err);
         return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
@@ -116,22 +140,4 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ received: true });
-}
-
-async function stripeWebhookEvent(
-    body: string,
-    sig: string | null,
-    webhookSecret: string | undefined
-): Promise<Stripe.Event | null> {
-    if (!sig || !webhookSecret) {
-        console.error("Missing stripe-signature or STRIPE_WEBHOOK_SECRET");
-        return null;
-    }
-
-    try {
-        return stripe.webhooks.constructEvent(body, sig, webhookSecret);
-    } catch (err) {
-        console.error("Stripe signature verification failed:", err);
-        return null;
-    }
 }
