@@ -23,7 +23,7 @@ export async function GET(_req: Request, { params }) {
         .eq("customer_id", user.id)
         .maybeSingle();
 
-    if (data!.subscription_status !== "active") {
+    if (data?.subscription_status !== "active") {
         return NextResponse.json({ error: "Payment Required" }, { status: 402 })
     }
 
