@@ -36,7 +36,7 @@ export default async function Page() {
             className="pointer-events-none absolute left-1/2 -bottom-36 h-80 w-[115vw] max-w-6xl -translate-x-1/2 rounded-full opacity-45 blur-3xl"
             style={{
               background:
-                "radial-gradient(ellipse at center, rgba(30, 58, 138, 0.2) 0%, rgba(67, 56, 202, 0.16) 38%, rgba(76, 29, 149, 0.12) 58%, rgba(0, 0, 0, 0) 78%)",
+                "radial-gradient(ellipse at center, rgba(30, 58, 138, 0.3) 0%, rgba(67, 56, 202, 0.21) 38%, rgba(76, 29, 149, 0.16) 58%, rgba(0, 0, 0, 0) 78%)",
             }}
           />
         )}
