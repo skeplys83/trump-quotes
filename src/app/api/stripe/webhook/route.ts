@@ -70,7 +70,7 @@ export async function POST(req: Request) {
                     .from("weather-subscriptions")
                     .update({
                         stripe_subscription_id: subscription.id,
-                        subscription_status: "active",
+                        subscription_status: subscription.status,
                         current_period_end: new Date(nextPeriodEnd * 1000).toISOString(),
                     })
                     .eq("customer_id", userId);
@@ -92,17 +92,38 @@ export async function POST(req: Request) {
                     throw new Error("No supabase_user_id found in Stripe customer metadata");
                 }
 
-                // Delete the subscription from the database on payment failure
                 const { error } = await supabase
                     .from("weather-subscriptions")
-                    .delete()
+                    .update({ subscription_status: "past_due" })
                     .eq("customer_id", userId);
 
                 if (error) {
-                    throw new Error("Failed to delete subscription from database: " + error.message);
+                    throw new Error("Failed to update subscription in database: " + error.message);
                 }
 
-                console.log("Payment failed and subscription deleted for user:", userId);
+                console.log("Payment failed, subscription marked past_due for user:", userId);
+                break;
+            }
+
+            case "customer.subscription.updated": {
+                const subscription = event.data.object as Stripe.Subscription;
+                const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
+                const userId = customer.metadata?.supabase_user_id;
+
+                if (!userId) {
+                    throw new Error("No supabase_user_id found in Stripe customer metadata");
+                }
+
+                const { error } = await supabase
+                    .from("weather-subscriptions")
+                    .update({ subscription_status: subscription.status })
+                    .eq("customer_id", userId);
+
+                if (error) {
+                    throw new Error("Failed to update subscription status in database: " + error.message);
+                }
+
+                console.log(`Subscription updated to '${subscription.status}' for user:`, userId);
                 break;
             }
 
