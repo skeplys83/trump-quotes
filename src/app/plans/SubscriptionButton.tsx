@@ -40,12 +40,12 @@ export default function SubscriptionButton() {
       <div className="flex items-center gap-4">
         {billingPeriodEnd && (
           <p className="text-sm text-muted-foreground flex-1">
-            Next billing: {billingPeriodEnd}
+            Current billing period: {billingPeriodEnd}
           </p>
         )}
         <form action="/api/stripe/portal" method="POST">
-          <Button type="submit" variant="destructive" size="lg" className="cursor-pointer">
-            Manage Subscription in Stripe Customer portal
+          <Button type="submit" variant="default" size="lg" className="cursor-pointer">
+            Manage Subscription
           </Button>
         </form>
       </div>
