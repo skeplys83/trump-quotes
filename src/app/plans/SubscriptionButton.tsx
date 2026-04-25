@@ -1,16 +1,6 @@
 "use client"
 
 import { Button } from "@/src/components/shadcn/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/src/components/shadcn/dialog";
-import { useState } from "react";
 import useSWR from "swr";
 import axios from "axios";
 import SpinnerDemo from "@/src/components/shadcn/spinner-01";
@@ -27,7 +17,6 @@ export default function SubscriptionButton() {
     "/api/subscription",
     fetcher
   );
-  const [open, setOpen] = useState(false);
 
   const isActive = subscription?.subscription_status === "active";
   const billingPeriodEnd = subscription?.current_period_end
@@ -54,35 +43,11 @@ export default function SubscriptionButton() {
             Next billing: {billingPeriodEnd}
           </p>
         )}
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button
-              variant="destructive"
-              size="lg"
-              className="cursor-pointer"
-            >
-              Cancel Subscription
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Are you sure?</DialogTitle>
-              <DialogDescription>
-                This will cancel your subscription. You&apos;ll still have access until the end of your current billing period.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>
-                No, keep subscription
-              </Button>
-              <form action="/api/stripe/cancel" method="POST">
-                <Button type="submit" variant="destructive" className="cursor-pointer">
-                  Yes, cancel subscription
-                </Button>
-              </form>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <form action="/api/stripe/portal" method="POST">
+          <Button type="submit" variant="destructive" size="lg" className="cursor-pointer">
+            Manage Subscription in Stripe Customer portal
+          </Button>
+        </form>
       </div>
     );
   }
