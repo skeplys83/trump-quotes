@@ -55,7 +55,7 @@ export default function SearchBox() {
   return (
     <div className="w-full mx-3 sm:w-md">
       <h1 className="text-center mb-2">Search for City</h1>
-      <Input onKeyDown={handleInput} className='w-full border-amber-300' />
+      <Input onKeyDown={handleInput} className='w-full' />
       {isLoading && (
         <div className="mt-6 w-full h-36 rounded-xl flex items-center justify-center">
           <LoaderIcon className="animate-spin w-6 h-6" />

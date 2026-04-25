@@ -44,7 +44,7 @@ export default function SubscriptionButton() {
           </p>
         )}
         <form action="/api/stripe/portal" method="POST">
-          <Button type="submit" variant="default" size="lg" className="cursor-pointer">
+          <Button type="submit" variant="outline" size="lg" className="cursor-pointer">
             Manage Subscription
           </Button>
         </form>
