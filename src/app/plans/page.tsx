@@ -31,7 +31,7 @@ export default async function PlansPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-bold">$0.01</span>
+                <span className="text-5xl font-bold">EUR 0.05</span>
                 <span className="text-muted-foreground">/month</span>
               </div>
 
