@@ -26,17 +26,17 @@ export default async function Page() {
 
   return (
     <>
-      <div className="min-h-screen flex flex-col relative overflow-hidden">
+      <div className="flex-1 flex flex-col relative overflow-hidden">
         <Header />
         <div className="flex flex-1 justify-center items-center">
           <Search></Search>
         </div>
         {isPro && (
           <div
-            className="pointer-events-none absolute left-1/2 -bottom-36 h-80 w-[115vw] max-w-6xl -translate-x-1/2 rounded-full opacity-45 blur-3xl"
+            className="pointer-events-none absolute left-1/2 -bottom-36 h-80 w-[85vw] max-w-none -translate-x-1/2 rounded-full opacity-55 blur-3xl"
             style={{
               background:
-                "radial-gradient(ellipse at center, rgba(30, 58, 138, 0.3) 0%, rgba(67, 56, 202, 0.21) 38%, rgba(76, 29, 149, 0.16) 58%, rgba(0, 0, 0, 0) 78%)",
+                "radial-gradient(ellipse at center, rgba(30, 58, 138, 0.45) 0%, rgba(67, 56, 202, 0.35) 45%, rgba(76, 29, 149, 0.2) 68%, rgba(0, 0, 0, 0) 90%)",
             }}
           />
         )}

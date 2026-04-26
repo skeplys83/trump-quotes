@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { cn } from "@/src/lib/utils"
 import { Button } from "@/src/components/shadcn/button"
 import {
@@ -64,8 +65,10 @@ export function LoginForm({
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        By signing up, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        By signing up, you agree to our{" "}
+        <Link href="/legal/terms" className="underline hover:text-foreground transition-colors">Terms of Service</Link>{" "}
+        and{" "}
+        <Link href="/legal/privacy" className="underline hover:text-foreground transition-colors">Privacy Policy</Link>.
       </FieldDescription>
     </div>
   )

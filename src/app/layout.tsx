@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { SupabaseSessionProvider } from "../lib/supabase/SupabaseSessionProvider";
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import Footer from "./Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,6 +19,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Next Weather",
   description: "lol",
+  icons: {
+    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>",
+  },
 };
 
 export default function RootLayout({
@@ -28,12 +32,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased dark flex flex-col min-h-screen`}
       >
         <SupabaseSessionProvider>
           {children}
           <Toaster />
           <SpeedInsights />
+          <Footer />
         </SupabaseSessionProvider>
       </body>
     </html>
