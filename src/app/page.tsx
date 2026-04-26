@@ -26,7 +26,7 @@ export default async function Page() {
 
   return (
     <>
-      <div className="flex-1 flex flex-col relative overflow-hidden">
+      <div className="flex-1 flex flex-col relative">
         <Header />
         <div className="flex flex-1 justify-center items-center">
           <Search></Search>

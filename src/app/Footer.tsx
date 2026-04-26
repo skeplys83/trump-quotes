@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
         <span>© {new Date().getFullYear()} Next Weather</span>
         <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-          <Link href="/legal/impressum" className="hover:text-foreground transition-colors">
+          <Link href="/legal/imprint" className="hover:text-foreground transition-colors">
             Imprint
           </Link>
           <Link href="/legal/privacy" className="hover:text-foreground transition-colors">

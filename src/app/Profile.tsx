@@ -48,7 +48,9 @@ export default function Profile() {
                         <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
                     </div>
                 </div>
-                <DropdownMenuItem disabled>user ID: {userId}</DropdownMenuItem>
+                <div className="px-2 py-1.5 text-xs text-muted-foreground select-text break-all">
+                    user ID: {userId}
+                </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                     className="cursor-pointer"
