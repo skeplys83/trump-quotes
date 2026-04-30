@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/src/components/shadcn/button";
 
 export const metadata = {
-  title: "Terms of Service – Next Weather",
+  title: "Terms of Service – Trump Quotes",
 };
 
 export default function TermsPage() {
@@ -25,7 +25,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="font-semibold text-lg">1. Provider</h2>
           <p className="text-muted-foreground">
-            Next Weather is operated by Martin Hustoles. For full contact details, see our{" "}
+            Trump Quotes is operated by Martin Hustoles. For full contact details, see our{" "}
             <Link href="/legal/impressum" className="underline hover:text-foreground transition-colors">
               Imprint
             </Link>
@@ -36,8 +36,8 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="font-semibold text-lg">2. Service Description</h2>
           <p className="text-muted-foreground">
-            Next Weather Pro is a subscription-based service that provides unlimited weather searches
-            powered by OpenWeatherMap. Access to the service requires an active subscription.
+            Trump Quotes Pro is a subscription-based service that provides unlimited access to random
+            Donald Trump quotes. Access to the service requires an active subscription.
           </p>
         </section>
 
@@ -88,7 +88,7 @@ export default function TermsPage() {
           <p className="text-muted-foreground">
             We aim to keep the service available at all times but cannot guarantee uninterrupted
             access. We are not liable for downtime caused by third-party providers (Vercel,
-            OpenWeatherMap, Supabase, Stripe) or circumstances beyond our reasonable control.
+            Supabase, Stripe) or circumstances beyond our reasonable control.
           </p>
         </section>
 

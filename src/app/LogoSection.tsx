@@ -23,9 +23,9 @@ export default function LogoSection() {
 
     return (
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
-            <span className="text-2xl font-bold">Next Weather</span>
+            <span className="text-2xl font-bold">Trump Quotes</span>
             {isPro && (
-                <span className="text-2xl font-bold bg-linear-to-r from-violet-400 to-violet-600 bg-clip-text text-transparent">
+                <span className="text-2xl font-bold bg-linear-to-r from-red-400 to-red-600 bg-clip-text text-transparent">
                     Pro
                 </span>
             )}

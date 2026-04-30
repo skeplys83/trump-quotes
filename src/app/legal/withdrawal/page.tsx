@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/src/components/shadcn/button";
 
 export const metadata = {
-  title: "Right of Withdrawal – Next Weather",
+  title: "Right of Withdrawal – Trump Quotes",
 };
 
 export default function WithdrawalPage() {
@@ -94,7 +94,7 @@ export default function WithdrawalPage() {
               provision of the following service:
             </p>
             <p>
-              Next Weather Pro subscription
+              Trump Quotes Pro subscription
             </p>
             <p>Ordered on (*): _______________</p>
             <p>Name of consumer(s): _______________</p>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/src/components/shadcn/button";
 
 export const metadata = {
-  title: "Impressum – Next Weather",
+  title: "Impressum – Trump Quotes",
 };
 
 export default function ImpressumPage() {

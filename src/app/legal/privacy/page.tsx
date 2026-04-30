@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/src/components/shadcn/button";
 
 export const metadata = {
-  title: "Privacy Policy – Next Weather",
+  title: "Privacy Policy – Trump Quotes",
 };
 
 export default function PrivacyPage() {
@@ -114,18 +114,10 @@ export default function PrivacyPage() {
               </p>
             </div>
             <div>
-              <p className="font-medium text-foreground">OpenWeatherMap</p>
+              <p className="font-medium text-foreground">What Does Trump Think API</p>
               <p>
-                Weather data is retrieved from OpenWeatherMap. Search queries (city names) are sent to
-                their API. No personal data is transmitted to OpenWeatherMap.{" "}
-                <a
-                  href="https://openweathermap.org/privacy-policy"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline hover:text-foreground transition-colors"
-                >
-                  OpenWeatherMap Privacy Policy
-                </a>
+                Quotes are retrieved from the What Does Trump Think API (whatdoestrumpthink.com).
+                No personal data is transmitted to this service.
               </p>
             </div>
           </div>
@@ -155,7 +147,7 @@ export default function PrivacyPage() {
           </ul>
           <p className="text-muted-foreground mt-2">
             To exercise any of these rights, please contact us at{" "}
-            <span className="text-foreground">[YOUR EMAIL ADDRESS]</span>.
+            <span className="text-foreground">hustoles.martin@gmail.com</span>.
           </p>
         </section>
 
