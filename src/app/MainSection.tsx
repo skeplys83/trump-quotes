@@ -9,7 +9,7 @@ export default function MainSection() {
 
   return (
     <div className="flex flex-1 items-center justify-center px-6">
-      <div className="flex items-center gap-16 w-full max-w-4xl">
+      <div className="flex items-center gap-16 w-full max-w-4xl flex-col sm:flex-row">
         {!hasQuote && <LandingHero />}
         <div className="flex-1 flex justify-center">
           <QuoteField onFirstQuote={() => setHasQuote(true)} />

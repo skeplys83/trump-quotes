@@ -32,7 +32,7 @@ export default function QuoteField({ onFirstQuote }: { onFirstQuote?: () => void
   }
 
   return (
-    <div className="w-full mx-3 sm:w-md flex flex-col items-center">
+    <div className="w-full mx-3 pb-10 sm:w-md flex flex-col items-center">
       {!quote && !isLoading && (
         <div className="relative mb-6 rounded-2xl overflow-hidden" style={{ width: 320, height: 320 }}>
           <Image
