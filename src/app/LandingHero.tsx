@@ -18,7 +18,7 @@ export default function LandingHero() {
 
       <p className="text-muted-foreground text-base leading-relaxed">
         Get certified, 100% real Donald Trump quotes delivered straight to your screen.
-        Finally, a SaaS product that tells the trugh, the whole truth, and nothing but the truth!
+        Finally, a SaaS product that tells the truth, and nothing but the truth!
       </p>
 
       <ul className="space-y-2 text-sm">
