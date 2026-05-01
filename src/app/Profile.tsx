@@ -59,7 +59,12 @@ export default function Profile() {
                     Plans
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem disabled>Settings</DropdownMenuItem>
+                <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => window.location.href = '/settings'}
+                >
+                    Settings
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                     className="cursor-pointer"

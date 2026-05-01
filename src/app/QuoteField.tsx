@@ -33,31 +33,42 @@ export default function QuoteField({ onFirstQuote }: { onFirstQuote?: () => void
 
   return (
     <div className="w-full mx-3 pb-10 sm:w-md flex flex-col items-center">
-      {!quote && !isLoading && (
-        <div className="relative mb-6 rounded-2xl overflow-hidden" style={{ width: 320, height: 320 }}>
-          <Image
-            src="/trump.jpg"
-            alt="Donald Trump"
-            fill
-            sizes="320px"
-            className="object-cover"
-            priority
-          />
-          <div className="inset-0 rounded-2xl" style={{ background: 'radial-gradient(ellipse at center, transparent 72%, black 100%)' }} />
+      {!quote ? (
+        <div className="relative mb-6 rounded-2xl overflow-hidden flex items-center justify-center" style={{ width: 320, height: 320 }}>
+          {isLoading ? (
+            <LoaderIcon className="animate-spin w-6 h-6" />
+          ) : (
+            <>
+              <Image
+                src="/trump.jpg"
+                alt="Donald Trump"
+                fill
+                sizes="320px"
+                className="object-cover"
+                priority
+              />
+              <div className="inset-0 rounded-2xl" style={{ background: 'radial-gradient(ellipse at center, transparent 72%, black 100%)' }} />
+            </>
+          )}
+        </div>
+      ) : (
+        <div className="relative mb-6 w-full">
+          <QuoteWidget quote={quote} className="rounded-xl" />
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-background/60 backdrop-blur-sm">
+              <LoaderIcon className="animate-spin w-6 h-6" />
+            </div>
+          )}
         </div>
       )}
-      {quote && <QuoteWidget quote={quote} className="mb-6 w-full rounded-xl" />}
       <Button
         onClick={fetchQuote}
         disabled={isLoading}
         size="lg"
         variant="outline"
-        className="w-xsm cursor-pointer border-red-600 "
+        className="w-xsm cursor-pointer border-red-600"
       >
-        {isLoading
-          ? <LoaderIcon className="animate-spin w-4 h-4" />
-          : "Get Trump Quote"
-        }
+        Get Trump Quote
       </Button>
     </div>
   )
