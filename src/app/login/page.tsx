@@ -1,8 +1,6 @@
-"use client"
-
-import Link from "next/link";
-import { Button } from "@/src/components/shadcn/button";
-import { LoginForm } from "./loginForm";
+import Link from "next/link"
+import { Button } from "@/src/components/shadcn/button"
+import { LoginForm } from "./loginForm"
 
 export default function LoginPage() {
     return (
@@ -20,5 +18,5 @@ export default function LoginPage() {
                 </div>
             </div>
         </>
-    );
+    )
 }
