@@ -50,9 +50,10 @@ export default function ProcessingPage() {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center gap-4">
             <LoaderIcon className="animate-spin w-6 h-6" />
+            <h1 className="text-2xl font-semibold text-center">Processing payment...</h1>
             {showFallback && (
                 <>
-                    <p className="text-sm text-muted-foreground mt-5">Not loading? Return to plans</p>
+                    <p className="text-sm text-muted-foreground mt-5">Not loading?</p>
                     <Button
                         variant="outline"
                         onClick={() => router.push("/plans")}
