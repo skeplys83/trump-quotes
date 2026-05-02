@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Trump Quotes",
-  description: "Get random Donald Trump quotes.",
+  description: "Get unlimited random Donald Trump quotes. Subscribe for Pro access and receive fresh wisdom from the 45th and 47th President of the United States, delivered instantly.",
   icons: {
     icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇺🇸</text></svg>",
   },
