@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /plans
+Allow: /legal/
+
+Disallow: /api/
+Disallow: /settings
+Disallow: /processing
+Disallow: /billing/
+
+Sitemap: https://trumpquotes.martinhustoles.com/sitemap.xml
