@@ -1,11 +1,11 @@
 import { createSupabaseAdmin } from "@/src/lib/supabase/supabaseAdmin";
 import { createSupabaseServer } from "@/src/lib/supabase/supabaseServer";
 import axios from "axios";
-import { unstable_noStore } from "next/cache";
 import { NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
-    unstable_noStore();
 
     const supabase = await createSupabaseServer();
     const supabaseAdmin = createSupabaseAdmin();
