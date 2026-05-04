@@ -1,16 +1,12 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-import HCaptcha from "@hcaptcha/react-hcaptcha"
 import { Button } from "@/src/components/shadcn/button"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/src/components/shadcn/field"
 import { Input } from "@/src/components/shadcn/input"
 import { LoaderIcon } from "lucide-react"
-import { Captcha } from "./Captcha"
 import { signInWithEmail, signUpWithEmail } from "./actions"
-
-const IS_DEV = process.env.NODE_ENV === "development"
 
 type Props = {
   mode: "signin" | "signup"
@@ -18,7 +14,6 @@ type Props = {
 
 export function AuthForm({ mode }: Props) {
   const router = useRouter()
-  const captchaRef = useRef<HCaptcha>(null)
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -32,21 +27,8 @@ export function AuthForm({ mode }: Props) {
     setMessage(null)
     setLoading(true)
 
-    if (IS_DEV) {
-      await handleAuth()
-    } else {
-      captchaRef.current?.execute()
-    }
-  }
-
-  async function handleCaptchaVerify(token: string) {
-    await handleAuth(token)
-    captchaRef.current?.resetCaptcha()
-  }
-
-  async function handleAuth(captchaToken?: string) {
     if (mode === "signin") {
-      const { error } = await signInWithEmail(email, password, captchaToken)
+      const { error } = await signInWithEmail(email, password)
       if (error) {
         setError(error)
       } else {
@@ -58,7 +40,6 @@ export function AuthForm({ mode }: Props) {
         email,
         password,
         `${window.location.origin}/api/auth/callback?next=/`,
-        captchaToken,
       )
       if (error) {
         setError(error)
@@ -99,15 +80,6 @@ export function AuthForm({ mode }: Props) {
 
         {error && <FieldError>{error}</FieldError>}
         {message && <p className="text-sm text-green-500">{message}</p>}
-
-        {!IS_DEV && (
-          <Captcha
-            ref={captchaRef}
-            onVerify={handleCaptchaVerify}
-            onError={() => { setError("Captcha failed. Please try again."); setLoading(false) }}
-            onExpire={() => { setError("Captcha expired. Please try again."); setLoading(false) }}
-          />
-        )}
 
         <Button type="submit" className="w-full" disabled={loading}>
           {loading

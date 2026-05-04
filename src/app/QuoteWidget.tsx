@@ -1,7 +1,9 @@
 "use client"
 
 import { cn } from '@/src/lib/utils'
-import { useEffect, useState } from 'react'
+import { toBlob } from 'html-to-image'
+import { Check, Copy } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 
 const TRUMP_IMAGES = [
   "https://media.gettyimages.com/id/2271917249/de/foto/washington-dc-u-s-president-donald-trump-speaks-in-the-oval-office-after-signing-an-executive.jpg?s=2048x2048&w=gi&k=20&c=kBg3Wl9KBqTxV0i5YLjHPJODjn5CzWmIFaH8Pn4P97Q=",
@@ -20,19 +22,45 @@ const TRUMP_IMAGES = [
 
 export default function QuoteWidget({ quote, className }: { quote: string; className?: string }) {
   const [imgSrc, setImgSrc] = useState('')
+  const [copied, setCopied] = useState(false)
+  const widgetRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     setImgSrc(TRUMP_IMAGES[Math.floor(Math.random() * TRUMP_IMAGES.length)])
   }, [quote])
 
+  async function handleCopy() {
+    if (!widgetRef.current) return
+    const blob = await toBlob(widgetRef.current, {
+      filter: (el) => el !== buttonRef.current,
+      backgroundColor: '#171717',
+    })
+    if (!blob) return
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })])
+
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const proxiedSrc = imgSrc ? `/api/image-proxy?url=${encodeURIComponent(imgSrc)}` : ''
+
   return (
-    <div className={cn("border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/60 backdrop-blur-sm shadow-sm overflow-hidden text-neutral-900 dark:text-neutral-100", className)}>
+    <div ref={widgetRef} className={cn("relative border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/60 backdrop-blur-sm shadow-sm overflow-hidden text-neutral-900 dark:text-neutral-100", className)}>
+      <button
+        ref={buttonRef}
+        onClick={handleCopy}
+        className="absolute top-2 right-2 z-10 p-1.5 rounded-md bg-black/20 hover:bg-black/40 text-white transition-colors cursor-pointer"
+      >
+        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+      </button>
       <div className="w-full h-56 overflow-hidden shrink-0">
-        {imgSrc && (
+        {proxiedSrc && (
           <img
-            src={imgSrc}
+            src={proxiedSrc}
             alt="Donald Trump"
             className="w-full h-full object-cover"
+            crossOrigin="anonymous"
             onError={() => setImgSrc('')}
           />
         )}
