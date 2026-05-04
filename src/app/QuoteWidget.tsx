@@ -4,6 +4,7 @@ import { cn } from '@/src/lib/utils'
 import { toBlob } from 'html-to-image'
 import { Check, Copy } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 const TRUMP_IMAGES = [
   "https://media.gettyimages.com/id/2271917249/de/foto/washington-dc-u-s-president-donald-trump-speaks-in-the-oval-office-after-signing-an-executive.jpg?s=2048x2048&w=gi&k=20&c=kBg3Wl9KBqTxV0i5YLjHPJODjn5CzWmIFaH8Pn4P97Q=",
@@ -38,7 +39,7 @@ export default function QuoteWidget({ quote, className }: { quote: string; class
     })
     if (!blob) return
     await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })])
-
+    toast.success("Quote copied to clipboard!")
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
