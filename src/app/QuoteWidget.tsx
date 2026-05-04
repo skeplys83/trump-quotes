@@ -39,7 +39,7 @@ export default function QuoteWidget({ quote, className }: { quote: string; class
     })
     if (!blob) return
     await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })])
-    toast.success("Quote copied to clipboard!")
+    toast.success("Image copied to clipboard!")
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
