@@ -1,14 +1,17 @@
 # Trump Quotes
 
+![App screenshot](public/page.png)
+
 A full-stack SaaS learning project built with Next.js. Users can sign up, subscribe via Stripe, and receive random Donald Trump quotes from an external API. Built to practice integrating Vercel, Supabase, Stripe, and third-party APIs end-to-end.
 
 ---
 
 ## What It Does
 
-- **Authentication** — email/password, Google OAuth, and X (Twitter) OAuth via Supabase Auth, with hCaptcha bot protection on email forms
+- **Authentication** — email/password, Google OAuth, and X (Twitter) OAuth via Supabase Auth
 - **Subscription gate** — quotes are only accessible to users with an active Stripe subscription (€0.51/month)
 - **Quote fetching** — calls the public [whatdoestrumpthink.com](https://whatdoestrumpthink.com) API on every request, gated server-side
+- **Free preview** — unauthenticated users get 3 free quotes tracked in `localStorage` (client-side only, no server enforcement)
 - **Account management** — users can update their password, manage/cancel their subscription, and delete their account
 - **Stripe billing** — checkout, webhook handling, customer portal, and subscription cancellation
 - **Legal pages** — Privacy Policy, Terms of Service, Imprint, Right of Withdrawal
@@ -26,7 +29,6 @@ A full-stack SaaS learning project built with Next.js. Users can sign up, subscr
 | Auth          | Supabase Auth (`@supabase/ssr`) |
 | Database      | Supabase Postgres               |
 | Payments      | Stripe                          |
-| Captcha       | hCaptcha                        |
 | Hosting       | Vercel                          |
 | Analytics     | Vercel Speed Insights           |
 | External API  | whatdoestrumpthink.com          |
@@ -47,7 +49,7 @@ src/
 │   │   │   ├── portal/         # Redirect to Stripe customer portal
 │   │   │   └── webhook/        # Handle Stripe events (invoice.paid, etc.)
 │   │   ├── subscription/       # GET current user subscription status
-│   │   └── trump-quote/        # GET random quote (requires active subscription)
+│   │   └── trump-quote/        # GET random quote (auth + active subscription); /free for guests (3-quote localStorage gate)
 │   ├── login/                  # Auth UI (sign in, sign up, forgot password)
 │   ├── plans/                  # Pricing page + subscription button
 │   ├── settings/               # Account settings (password, plans, delete)
@@ -87,8 +89,6 @@ STRIPE_WEATHER_PRICE_ID=
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 
-# hCaptcha
-NEXT_PUBLIC_HCAPTCHA_SITE_KEY=
 ```
 
 ---
@@ -138,12 +138,6 @@ Under **Authentication → URL Configuration**, add to the allowed redirect list
 https://your-app.vercel.app/api/auth/callback
 http://localhost:3000/api/auth/callback
 ```
-
-**Captcha**
-
-Under **Authentication → Attack Protection**, enable hCaptcha and paste your hCaptcha secret key (from hcaptcha.com). The public site key goes into `NEXT_PUBLIC_HCAPTCHA_SITE_KEY`.
-
-> Captcha is automatically skipped in local development (`NODE_ENV === "development"`). Disable it in the Supabase dashboard when testing locally, and re-enable before deploying.
 
 ---
 
@@ -199,7 +193,7 @@ For the full checkout and subscription flow, run the Stripe CLI forwarder in a s
 ## Auth Flow
 
 ```
-Email/password  →  hCaptcha verify  →  Supabase server action  →  session cookie set  →  redirect home
+Email/password  →  Supabase server action  →  session cookie set  →  redirect home
 Google / X      →  Supabase OAuth redirect  →  /api/auth/callback  →  exchange code for session  →  redirect home
 ```
 

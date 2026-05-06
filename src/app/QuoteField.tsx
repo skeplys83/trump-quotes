@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Button } from '@/src/components/shadcn/button'
 import { toast } from 'sonner'
@@ -8,18 +8,41 @@ import { LoaderIcon } from 'lucide-react'
 import QuoteWidget from './QuoteWidget'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { useSessionContext } from '@/src/lib/supabase/SupabaseSessionContext'
+
+const FREE_LIMIT = 3
+const LS_KEY = 'trump_free_remaining'
 
 export default function QuoteField({ onFirstQuote }: { onFirstQuote?: () => void }) {
   const [quote, setQuote] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [freeRemaining, setFreeRemaining] = useState<number | null>(null)
   const router = useRouter()
+  const { user, isLoading: authLoading } = useSessionContext()
+
+  useEffect(() => {
+    const stored = localStorage.getItem(LS_KEY)
+    setFreeRemaining(stored !== null ? parseInt(stored, 10) : FREE_LIMIT)
+  }, [])
 
   const fetchQuote = async () => {
+    if (!user && freeRemaining === 0) {
+      router.push('/login')
+      return
+    }
+
     setIsLoading(true)
     try {
-      const res = await axios.get('/api/trump-quote')
+      const endpoint = user ? '/api/trump-quote' : '/api/trump-quote/free'
+      const res = await axios.get(endpoint)
       if (!quote) onFirstQuote?.()
       setQuote(res.data.quote)
+
+      if (!user) {
+        const next = Math.max(0, (freeRemaining ?? FREE_LIMIT) - 1)
+        setFreeRemaining(next)
+        localStorage.setItem(LS_KEY, String(next))
+      }
     } catch (error: any) {
       const status = error.response?.status
       if (status === 401) { router.push('/login'); return }
@@ -30,6 +53,8 @@ export default function QuoteField({ onFirstQuote }: { onFirstQuote?: () => void
       setIsLoading(false)
     }
   }
+
+  const showFreeCounter = !authLoading && !user
 
   return (
     <div className="w-full mx-3 pb-10 sm:w-md flex flex-col items-center">
@@ -61,6 +86,7 @@ export default function QuoteField({ onFirstQuote }: { onFirstQuote?: () => void
           )}
         </div>
       )}
+
       <Button
         onClick={fetchQuote}
         disabled={isLoading}
@@ -70,6 +96,14 @@ export default function QuoteField({ onFirstQuote }: { onFirstQuote?: () => void
       >
         Get Trump Quote
       </Button>
+
+      {showFreeCounter && freeRemaining !== null && (
+        <p className="mt-3 text-xs text-muted-foreground">
+          {freeRemaining === 0
+            ? 'Sign in for more quotes'
+            : `${freeRemaining} free ${freeRemaining === 1 ? 'quote' : 'quotes'} left`}
+        </p>
+      )}
     </div>
   )
 }

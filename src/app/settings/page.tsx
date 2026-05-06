@@ -126,7 +126,7 @@ export default function SettingsPage() {
           </Button>
         </Link>
       </div>
-      <div className="min-h-screen px-4 py-12">
+      <div className="min-h-screen px-4 py-12 pt-20">
         <div className="max-w-2xl mx-auto flex flex-col gap-6">
           <h1 className="text-2xl font-semibold">Account Settings</h1>
 
