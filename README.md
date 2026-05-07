@@ -1,8 +1,8 @@
 # Trump Quotes
 
-![App screenshot](public/page.png)
-
 A full-stack SaaS learning project built with Next.js. Users can sign up, subscribe via Stripe, and receive random Donald Trump quotes from an external API. Built to practice integrating Vercel, Supabase, Stripe, and third-party APIs end-to-end.
+
+![App screenshot](public/page.png)
 
 ---
 
