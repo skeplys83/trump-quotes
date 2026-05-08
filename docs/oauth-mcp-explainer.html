@@ -136,6 +136,7 @@
   }
   .tag.get { background: #dbeafe; color: #1e40af; }
   .tag.post { background: #dcfce7; color: #166534; }
+  .tag.delete { background: #fee2e2; color: #991b1b; }
   .tag.any { background: #f3e8ff; color: #6b21a8; }
   .divider { border: none; border-top: 1px solid #e5e7eb; margin: 32px 0; }
   @media print {
@@ -158,8 +159,8 @@
 <p>There are two systems working together here:</p>
 
 <ul>
-  <li><strong>MCP (Model Context Protocol)</strong> — a standard that lets AI assistants call tools on external servers. Claude uses it to ask "what is this user's subscription status?" and get a real answer from your database.</li>
-  <li><strong>OAuth 2.1</strong> — a standard for securely linking two accounts. It lets a TrumpQuotes user say "yes, I authorise Claude to read my subscription data" without giving Claude their password.</li>
+  <li><strong>MCP (Model Context Protocol)</strong> — a standard that lets AI assistants call tools on external servers. Claude uses it to query subscription data, manage billing, and fetch quotes — all live from your database.</li>
+  <li><strong>OAuth 2.1</strong> — a standard for securely linking two accounts. It lets a TrumpQuotes user say "yes, I authorise Claude to access my account" without giving Claude their password.</li>
 </ul>
 
 <p>Neither system exists without the other here. OAuth gives Claude a secure token that proves who the user is. MCP gives Claude a structured way to call your server using that token.</p>
@@ -174,7 +175,7 @@
 
 <p>MCP (Model Context Protocol) is an open standard created by Anthropic. It lets AI assistants connect to external "tools" — functions they can call to get real data or perform actions.</p>
 
-<p>Without MCP, Claude only knows what was in its training data. With MCP, Claude can call <em>your</em> server and get live information.</p>
+<p>Without MCP, Claude only knows what was in its training data. With MCP, Claude can call <em>your</em> server and get live information or take real actions.</p>
 
 <h3>How a tool call works</h3>
 
@@ -183,7 +184,7 @@
     <div class="num">1</div>
     <div class="content">
       <strong>User types a message</strong>
-      <span class="sub">"What is my subscription status?"</span>
+      <span class="sub">"Cancel my subscription."</span>
     </div>
   </div>
   <div class="flow-connector"></div>
@@ -191,7 +192,7 @@
     <div class="num">2</div>
     <div class="content">
       <strong>Claude reads the tool list</strong>
-      <span class="sub">It knows about <code>get_subscription_info</code> because your server declared it.</span>
+      <span class="sub">It knows about <code>cancel_subscription</code> because your server declared it.</span>
     </div>
   </div>
   <div class="flow-connector"></div>
@@ -207,7 +208,7 @@
     <div class="num">4</div>
     <div class="content">
       <strong>Your server responds</strong>
-      <span class="sub">It validates the token, queries Supabase, and returns: <code>Status: active — renews June 3, 2026</code></span>
+      <span class="sub">It validates the token, calls the Stripe API, updates Supabase, and returns a confirmation.</span>
     </div>
   </div>
   <div class="flow-connector"></div>
@@ -215,7 +216,7 @@
     <div class="num">5</div>
     <div class="content">
       <strong>Claude replies to the user</strong>
-      <span class="sub">"Your subscription is active and renews on June 3rd, 2026."</span>
+      <span class="sub">"Done — your subscription is cancelled. You keep access until June 3rd, 2026."</span>
     </div>
   </div>
 </div>
@@ -229,7 +230,50 @@
 </div>
 
 <!-- ─────────────────────────────────────────────── -->
-<h2>3. What is OAuth 2.1?</h2>
+<h2>3. MCP Tools</h2>
+
+<p>Your server exposes five tools. All tools require a valid OAuth Bearer token — if the user is not authenticated, every tool returns "Not authenticated." before doing anything.</p>
+
+<table>
+  <tr>
+    <th>Tool name</th>
+    <th>What it does</th>
+    <th>Subscription required?</th>
+  </tr>
+  <tr>
+    <td><code>get_subscription_info</code></td>
+    <td>Returns the user's current subscription status and the date the current billing period ends. Queries <code>weather-subscriptions</code> directly.</td>
+    <td>No — works for any authenticated user including those without a subscription.</td>
+  </tr>
+  <tr>
+    <td><code>cancel_subscription</code></td>
+    <td>Sets <code>cancel_at_period_end: true</code> on the Stripe subscription, then updates the DB status to <code>canceling</code>. The user keeps access until the period ends. Rejects if status is not <code>active</code>.</td>
+    <td>Yes — must have an <code>active</code> subscription.</td>
+  </tr>
+  <tr>
+    <td><code>undo_cancellation</code></td>
+    <td>Reverses a pending cancellation by setting <code>cancel_at_period_end: false</code> on Stripe and restoring DB status to <code>active</code>. Rejects if status is not <code>canceling</code>.</td>
+    <td>Yes — must have a <code>canceling</code> subscription.</td>
+  </tr>
+  <tr>
+    <td><code>subscribe</code></td>
+    <td>Finds or creates a Stripe customer for the user, creates a Checkout session, and returns the URL for the user to open in their browser to complete payment. Rejects if an active subscription already exists.</td>
+    <td>No — intended for users without a subscription.</td>
+  </tr>
+  <tr>
+    <td><code>get_quote</code></td>
+    <td>Fetches a random Trump quote from the <code>whatdoestrumpthink.com</code> API and returns it. Rejects with a subscribe prompt if the user's status is not <code>active</code> or <code>canceling</code>.</td>
+    <td>Yes — must have an <code>active</code> or <code>canceling</code> subscription.</td>
+  </tr>
+</table>
+
+<div class="box yellow">
+  <h4>Why does <code>get_quote</code> allow <code>canceling</code>?</h4>
+  <p>A <code>canceling</code> subscription is still paid and active — the user has just scheduled it to end at the next billing date. They have paid for the current period and should keep full access until it lapses.</p>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<h2>4. What is OAuth 2.1?</h2>
 
 <p>OAuth is a protocol that lets a user give a third-party application limited access to their account on another service — without sharing their password.</p>
 
@@ -254,7 +298,7 @@
 </ol>
 
 <!-- ─────────────────────────────────────────────── -->
-<h2>4. The Complete Auth Flow</h2>
+<h2>5. The Complete Auth Flow</h2>
 
 <p>This is what happens the first time a user adds the TrumpQuotes connector in claude.ai:</p>
 
@@ -263,8 +307,22 @@
   │  Add connector │                    │                         │
   │  (URL + creds) │                    │                         │
   │───────────────▶│                    │                         │
+  │                │  GET /api/mcp      │                         │
+  │                │  (no token yet)    │                         │
+  │                │───────────────────▶│                         │
+  │                │  401 + WWW-Auth    │                         │
+  │                │  resource_metadata │                         │
+  │                │◀───────────────────│                         │
   │                │  GET /.well-known/ │                         │
-  │                │  oauth-auth-server │                         │
+  │                │  oauth-protected-  │                         │
+  │                │  resource          │                         │
+  │                │───────────────────▶│                         │
+  │                │  { authorization_  │                         │
+  │                │    servers: [base] }│                        │
+  │                │◀───────────────────│                         │
+  │                │  GET /.well-known/ │                         │
+  │                │  oauth-authorization│                        │
+  │                │  -server           │                         │
   │                │───────────────────▶│                         │
   │                │  { auth_endpoint,  │                         │
   │                │    token_endpoint }│                         │
@@ -282,6 +340,7 @@
   │◀────────────────────────────────────│                         │
   │                                     │                         │
   │  Click "Allow"                      │                         │
+  │  POST /api/oauth/authorize          │                         │
   │────────────────────────────────────▶│                         │
   │                                     │  Store auth_code hash   │
   │                                     │  (5 min TTL)            │
@@ -310,32 +369,41 @@
   │                │  Connector ready ✓ │                         │
   │◀───────────────│                    │                         │</div>
 
-<p>From this point on, every time the user asks Claude about their subscription:</p>
+<p>If the user clicks <strong>Deny</strong> instead, the browser POSTs to <code>/api/oauth/reject</code>, which redirects back to Claude's callback URL with <code>?error=access_denied&amp;state=...</code>.</p>
 
-<div class="diagram"><span class="actor">User</span>         <span class="actor">claude.ai</span>        <span class="actor">/api/mcp</span>           <span class="actor">Supabase DB</span>
+<p>From this point on, every time the user invokes a tool:</p>
+
+<div class="diagram"><span class="actor">User</span>         <span class="actor">claude.ai</span>        <span class="actor">/api/mcp</span>           <span class="actor">Supabase / Stripe</span>
   │                │                    │                    │
-  │  "What is my  │                    │                    │
-  │  subscription?"│                    │                    │
+  │  "Cancel my    │                    │                    │
+  │  subscription" │                    │                    │
   │───────────────▶│                    │                    │
   │                │  POST /api/mcp     │                    │
   │                │  Authorization:    │                    │
   │                │  Bearer TOKEN      │                    │
-  │                │  tool: get_sub_info│                    │
+  │                │  tool: cancel_sub  │                    │
   │                │───────────────────▶│                    │
   │                │                    │  Hash token        │
   │                │                    │  Look up user_id   │
   │                │                    │───────────────────▶│
-  │                │                    │  Query weather-    │
-  │                │                    │  subscriptions     │
+  │                │                    │  Get subscription  │
+  │                │                    │  from Supabase     │
   │                │                    │───────────────────▶│
-  │                │  { status, period }│                    │
+  │                │                    │  stripe.update(    │
+  │                │                    │  cancel_at_period  │
+  │                │                    │  _end: true)       │
+  │                │                    │───────────────────▶│
+  │                │                    │  Update DB status  │
+  │                │                    │  → "canceling"     │
+  │                │                    │───────────────────▶│
+  │                │  { confirmation }  │                    │
   │                │◀───────────────────│                    │
-  │  "Active,      │                    │                    │
-  │  renews Jun 3" │                    │                    │
+  │  "Done, access │                    │                    │
+  │  until Jun 3"  │                    │                    │
   │◀───────────────│                    │                    │</div>
 
 <!-- ─────────────────────────────────────────────── -->
-<h2>5. Your OAuth Endpoints</h2>
+<h2>6. OAuth Endpoints</h2>
 
 <table>
   <tr>
@@ -344,39 +412,59 @@
     <th>What it does</th>
   </tr>
   <tr>
-    <td><code>/api/.well-known/oauth-authorization-server</code></td>
+    <td><code>/.well-known/oauth-protected-resource</code></td>
     <td><span class="tag get">GET</span></td>
-    <td>Returns a JSON document describing where your auth and token endpoints are. Claude.ai fetches this automatically when you add the connector URL. This is how Claude discovers the full OAuth flow without you telling it manually.</td>
+    <td>RFC 9728 resource metadata. Returns <code>{ resource: "/api/mcp", authorization_servers: [base] }</code>. Claude fetches this after receiving a 401 with a <code>WWW-Authenticate: Bearer resource_metadata=</code> header. It tells Claude which auth server to use.</td>
+  </tr>
+  <tr>
+    <td><code>/.well-known/oauth-authorization-server</code></td>
+    <td><span class="tag get">GET</span></td>
+    <td>RFC 8414 auth server metadata. Returns the authorization and token endpoint URLs, supported grant types, and PKCE methods. Claude fetches this to discover the full OAuth flow automatically — no manual config needed.</td>
   </tr>
   <tr>
     <td><code>/oauth/authorize</code></td>
     <td><span class="tag get">GET</span></td>
-    <td>The consent page. Claude redirects the user's browser here. Your server checks if the user is logged in (via Supabase session cookie). If not, redirects to <code>/login</code> first. If yes, shows a "Allow / Deny" card. Also validates <code>client_id</code> — rejects unknown clients.</td>
+    <td>The consent page. Claude redirects the user's browser here. Validates <code>client_id</code>, checks Supabase session (redirects to <code>/login?next=...</code> if not logged in), and shows the Allow / Deny card with the TrumpQuotes and Claude icons.</td>
   </tr>
   <tr>
     <td><code>/api/oauth/authorize</code></td>
     <td><span class="tag post">POST</span></td>
-    <td>Handles the form submission when the user clicks "Allow". Generates a random one-time code, hashes it with SHA-256, stores the hash + user_id + redirect_uri + PKCE challenge in <code>oauth_auth_codes</code> (expires in 5 minutes). Redirects the browser back to Claude's callback URL with the raw code.</td>
+    <td>Handles the "Allow" form submission. Generates a random one-time code, hashes it with SHA-256, stores the hash + user_id + redirect_uri + PKCE challenge in <code>oauth_auth_codes</code> (5-minute TTL). Redirects the browser to Claude's callback URL with the raw code.</td>
+  </tr>
+  <tr>
+    <td><code>/api/oauth/reject</code></td>
+    <td><span class="tag post">POST</span></td>
+    <td>Handles the "Deny" form submission. Redirects to Claude's callback URL with <code>?error=access_denied&amp;state=...</code> per the OAuth spec. No database writes.</td>
   </tr>
   <tr>
     <td><code>/api/oauth/token</code></td>
     <td><span class="tag post">POST</span></td>
-    <td>Claude calls this server-to-server (not via browser). Receives the auth code + code_verifier + client credentials. Validates everything: client secret, PKCE, code expiry, redirect URI match, not already used. Issues an access token (random 32 bytes, hashed and stored in <code>oauth_access_tokens</code>). Returns the raw token to Claude.</td>
+    <td>Server-to-server token exchange (Claude calls this directly, not via browser). Validates client credentials (<code>client_secret_post</code> or HTTP Basic), verifies PKCE, checks code expiry and redirect URI match, marks code as used. Issues a 30-day access token stored as a hash in <code>oauth_access_tokens</code>.</td>
   </tr>
   <tr>
-    <td><code>/api/mcp</code></td>
-    <td><span class="tag any">GET/POST/DELETE</span></td>
-    <td>The MCP server itself. Validates the Bearer token by hashing it and checking <code>oauth_access_tokens</code>. If valid, exposes the <code>get_subscription_info</code> tool. Uses the <code>WebStandardStreamableHTTPServerTransport</code> from the MCP SDK — compatible with Vercel's serverless environment.</td>
+    <td><code>/api/oauth/connections</code></td>
+    <td><span class="tag get">GET</span></td>
+    <td>Returns a list of active OAuth connections (access tokens) for the currently logged-in user. Used by the settings page to display connected assistants. Returns <code>[{ id, created_at }]</code>.</td>
+  </tr>
+  <tr>
+    <td><code>/api/oauth/connections</code></td>
+    <td><span class="tag delete">DELETE</span></td>
+    <td>Deletes a specific access token by ID, scoped to the current user. Used by the "Disconnect" button in settings. Revoking a token means Claude's next MCP call will return 401 and the user will need to reconnect.</td>
   </tr>
   <tr>
     <td><code>/api/oauth/client-info</code></td>
     <td><span class="tag get">GET</span></td>
-    <td>Returns the OAuth Client ID and Secret for display in the settings page. Only accessible to authenticated users (checks Supabase session). Used so users can copy the credentials into claude.ai's connector dialog.</td>
+    <td>Returns <code>OAUTH_CLIENT_ID</code> and <code>OAUTH_CLIENT_SECRET</code> for display in the settings page. Only accessible to authenticated users (checks Supabase session).</td>
+  </tr>
+  <tr>
+    <td><code>/api/mcp</code></td>
+    <td><span class="tag any">GET/POST/DELETE</span></td>
+    <td>The MCP server. On 401, returns a <code>WWW-Authenticate: Bearer resource_metadata=</code> header to trigger OAuth discovery. On valid token, exposes all five tools (see Section 3). Uses <code>WebStandardStreamableHTTPServerTransport</code> — stateless, compatible with Vercel.</td>
   </tr>
 </table>
 
 <!-- ─────────────────────────────────────────────── -->
-<h2>6. Database Tables</h2>
+<h2>7. Database Tables</h2>
 
 <h3><code>oauth_auth_codes</code></h3>
 <p>Temporary one-time codes. Created when the user clicks Allow, consumed when Claude exchanges it for a token. Expire after 5 minutes and are marked <code>used = true</code> after exchange — preventing replay attacks.</p>
@@ -392,13 +480,13 @@
 </table>
 
 <h3><code>oauth_access_tokens</code></h3>
-<p>Long-lived tokens issued after a successful OAuth flow. Each token is tied to one user. When Claude makes an MCP request, it sends the raw token; your server hashes it and looks it up here to find the user.</p>
+<p>Long-lived tokens (30 days) issued after a successful OAuth flow. Each token is tied to one user. When Claude makes an MCP request, it sends the raw token; your server hashes it and looks it up here to find the user.</p>
 
 <table>
   <tr><th>Column</th><th>Type</th><th>Purpose</th></tr>
   <tr><td><code>token_hash</code></td><td>text</td><td>SHA-256 of the raw token. Raw token is only ever sent over HTTPS, never stored.</td></tr>
   <tr><td><code>user_id</code></td><td>uuid</td><td>The TrumpQuotes user this token belongs to.</td></tr>
-  <tr><td><code>created_at</code></td><td>timestamptz</td><td>When the token was issued.</td></tr>
+  <tr><td><code>created_at</code></td><td>timestamptz</td><td>When the token was issued. Displayed in the settings page as the connection date.</td></tr>
 </table>
 
 <div class="box yellow">
@@ -411,8 +499,31 @@
   <p>Both tables are accessed exclusively via the Supabase <strong>admin client</strong> (service role key), which bypasses RLS entirely. However, RLS is still <em>enabled</em> with no policies — this means the anon key and user-scoped keys cannot access these tables at all, even accidentally. It's a lockout layer for non-admin access.</p>
 </div>
 
+<h3>Automatic cleanup with pg_cron</h3>
+<p>Used and expired auth codes are cleaned up automatically every 10 minutes via Supabase's built-in <code>pg_cron</code> extension. This prevents the table from growing indefinitely. Codes are already rejected by application logic when expired or used — this is purely housekeeping.</p>
+
+<p>To set it up, run this once in the Supabase SQL editor:</p>
+
+<pre><span class="comment">-- Enable the extension</span>
+<span class="kw">create extension if not exists</span> pg_cron;
+
+<span class="comment">-- Schedule cleanup every 10 minutes</span>
+<span class="kw">select</span> cron.schedule(
+  <span class="str">'cleanup-oauth-auth-codes'</span>,
+  <span class="str">'*/10 * * * *'</span>,
+  <span class="str">$$
+    delete from oauth_auth_codes
+    where used = true
+       or expires_at &lt; now();
+  $$</span>
+);</pre>
+
+<p>View the job: <code>select * from cron.job;</code><br>
+Remove it: <code>select cron.unschedule('cleanup-oauth-auth-codes');</code><br>
+View the cron jobs in the Supabase dashboard under <strong>Database → Cron Jobs</strong>.</p>
+
 <!-- ─────────────────────────────────────────────── -->
-<h2>7. Security Properties</h2>
+<h2>8. Security Properties</h2>
 
 <table>
   <tr><th>Attack</th><th>How it's prevented</th></tr>
@@ -426,7 +537,7 @@
   </tr>
   <tr>
     <td>Auth code used after expiry</td>
-    <td>5-minute TTL enforced on every token exchange</td>
+    <td>5-minute TTL enforced on every token exchange; stale codes purged by pg_cron</td>
   </tr>
   <tr>
     <td>Unknown application impersonates Claude</td>
@@ -442,36 +553,54 @@
   </tr>
   <tr>
     <td>Unauthenticated MCP access</td>
-    <td>Every MCP request validates the token before any tool runs</td>
+    <td>Every MCP request validates the token before any tool runs; 401 triggers OAuth re-discovery</td>
+  </tr>
+  <tr>
+    <td>MCP tool called by wrong user</td>
+    <td>The token is tied to a specific <code>user_id</code>; all Supabase and Stripe queries are scoped to that ID</td>
+  </tr>
+  <tr>
+    <td>User revokes access</td>
+    <td>Deleting the row from <code>oauth_access_tokens</code> (via settings → Disconnect) immediately invalidates the token</td>
   </tr>
 </table>
 
 <!-- ─────────────────────────────────────────────── -->
-<h2>8. File Map</h2>
+<h2>9. File Map</h2>
 
 <table>
   <tr><th>File</th><th>What it is</th></tr>
-  <tr><td><code>src/app/api/.well-known/oauth-authorization-server/route.ts</code></td><td>OAuth metadata — tells Claude where your endpoints are</td></tr>
-  <tr><td><code>src/app/oauth/authorize/page.tsx</code></td><td>Consent UI — the page the user sees to Allow or Deny</td></tr>
+  <tr><td><code>src/app/.well-known/oauth-protected-resource/route.ts</code></td><td>RFC 9728 — tells Claude which auth server to use</td></tr>
+  <tr><td><code>src/app/.well-known/oauth-authorization-server/route.ts</code></td><td>RFC 8414 — tells Claude where the auth and token endpoints are</td></tr>
+  <tr><td><code>src/app/oauth/authorize/page.tsx</code></td><td>Consent UI — icons + dotted connector + Allow / Deny</td></tr>
   <tr><td><code>src/app/api/oauth/authorize/route.ts</code></td><td>Issues auth codes after the user clicks Allow</td></tr>
+  <tr><td><code>src/app/api/oauth/reject/route.ts</code></td><td>Redirects back to Claude with error=access_denied after Deny</td></tr>
   <tr><td><code>src/app/api/oauth/token/route.ts</code></td><td>Exchanges auth codes for access tokens (server-to-server)</td></tr>
+  <tr><td><code>src/app/api/oauth/connections/route.ts</code></td><td>GET list / DELETE one access token — used by settings page</td></tr>
   <tr><td><code>src/app/api/oauth/client-info/route.ts</code></td><td>Returns Client ID + Secret for display in settings</td></tr>
-  <tr><td><code>src/app/api/mcp/route.ts</code></td><td>The MCP server — validates token and exposes tools</td></tr>
-  <tr><td><code>src/app/settings/page.tsx</code></td><td>Settings UI with the connector credentials table</td></tr>
-  <tr><td><code>src/app/login/AuthForm.tsx</code></td><td>Updated to redirect to <code>?next=</code> after login (needed for OAuth redirect)</td></tr>
+  <tr><td><code>src/app/api/mcp/route.ts</code></td><td>The MCP server — validates token and exposes all five tools</td></tr>
+  <tr><td><code>src/app/settings/page.tsx</code></td><td>Settings page shell — auth guard + layout only</td></tr>
+  <tr><td><code>src/app/settings/AiAccessCard.tsx</code></td><td>AI Assistant Access card — lists connected assistants with Disconnect button</td></tr>
+  <tr><td><code>src/app/settings/PasswordCard.tsx</code></td><td>Update Password card</td></tr>
+  <tr><td><code>src/app/settings/PlansCard.tsx</code></td><td>Plans / billing card</td></tr>
+  <tr><td><code>src/app/settings/DangerZoneCard.tsx</code></td><td>Delete Account card</td></tr>
+  <tr><td><code>src/app/login/AuthForm.tsx</code></td><td>Updated to redirect to <code>?next=</code> after login — needed for the OAuth consent redirect</td></tr>
 </table>
 
 <!-- ─────────────────────────────────────────────── -->
-<h2>9. Environment Variables</h2>
+<h2>10. Environment Variables</h2>
 
 <table>
   <tr><th>Variable</th><th>Where used</th><th>Notes</th></tr>
-  <tr><td><code>OAUTH_CLIENT_ID</code></td><td>Authorize page, token route, client-info route</td><td>Public identifier for Claude as a client. Same value for all users.</td></tr>
-  <tr><td><code>OAUTH_CLIENT_SECRET</code></td><td>Token route, client-info route</td><td>Proves the token request is from Claude. Treat like a password — add to Vercel env vars, never commit to git.</td></tr>
+  <tr><td><code>OAUTH_CLIENT_ID</code></td><td>Authorize page, token route, client-info route</td><td>Public identifier for Claude as a client. Same value for all users. Generate once with <code>openssl rand -hex 16</code>.</td></tr>
+  <tr><td><code>OAUTH_CLIENT_SECRET</code></td><td>Token route, client-info route</td><td>Proves the token request is from Claude. Treat like a password — add to Vercel env vars, never commit to git. Generate with <code>openssl rand -hex 32</code>.</td></tr>
+  <tr><td><code>STRIPE_SECRET_KEY</code></td><td>MCP route (cancel, undo, subscribe tools)</td><td>Already required for the main billing flow. The MCP tools call Stripe directly to update subscriptions and create checkout sessions.</td></tr>
+  <tr><td><code>STRIPE_WEATHER_PRICE_ID</code></td><td>MCP route (<code>subscribe</code> tool)</td><td>The Stripe price ID used when the subscribe tool creates a checkout session.</td></tr>
+  <tr><td><code>NEXT_PUBLIC_APP_URL</code></td><td>MCP route (<code>subscribe</code> tool)</td><td>Used to build the success and cancel URLs for the Stripe checkout session.</td></tr>
 </table>
 
 <hr class="divider">
-<p style="color:#9ca3af;font-size:12px;text-align:center;">TrumpQuotes · Generated documentation · OAuth 2.1 + PKCE + MCP Streamable HTTP</p>
+<p style="color:#9ca3af;font-size:12px;text-align:center;">TrumpQuotes · OAuth 2.1 + PKCE + MCP Streamable HTTP · 5 tools · pg_cron cleanup</p>
 
 </body>
 </html>

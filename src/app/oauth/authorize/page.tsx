@@ -48,6 +48,14 @@ export default async function AuthorizePage({ searchParams }: Props) {
             <Card className="w-full max-w-sm shadow-lg">
                 <CardContent className="pt-8 pb-6 px-6 flex flex-col items-center gap-6">
 
+                    {/* Heading */}
+                    <div className="text-center flex flex-col gap-1">
+                        <h1 className="text-lg font-semibold">Claude wants to connect</h1>
+                        <p className="text-sm text-muted-foreground">
+                            Signed in as <span className="font-medium text-foreground">{user!.email}</span>
+                        </p>
+                    </div>
+
                     {/* Icons with dotted connector */}
                     <div className="flex items-center gap-0 w-full justify-center">
                         <div className="w-14 h-14 rounded-2xl border bg-background shadow-sm flex items-center justify-center shrink-0">
@@ -58,12 +66,7 @@ export default async function AuthorizePage({ searchParams }: Props) {
                             <span className="w-1.5 h-1.5 rounded-full bg-border" />
                             <span className="w-1.5 h-1.5 rounded-full bg-border" />
                             <span className="w-1.5 h-1.5 rounded-full bg-border" />
-                            <span className="w-5 h-5 rounded-full border-2 border-border flex items-center justify-center text-muted-foreground">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                                </svg>
-                            </span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-border" />
                             <span className="w-1.5 h-1.5 rounded-full bg-border" />
                             <span className="w-1.5 h-1.5 rounded-full bg-border" />
                             <span className="w-1.5 h-1.5 rounded-full bg-border" />
@@ -81,32 +84,24 @@ export default async function AuthorizePage({ searchParams }: Props) {
                         </div>
                     </div>
 
-                    {/* Heading */}
-                    <div className="text-center flex flex-col gap-1">
-                        <h1 className="text-lg font-semibold">Claude wants to connect</h1>
-                        <p className="text-sm text-muted-foreground">
-                            Signed in as <span className="font-medium text-foreground">{user!.email}</span>
-                        </p>
-                    </div>
-
                     {/* Actions */}
                     <div className="flex gap-3 w-full">
                         <form action="/api/oauth/reject" method="POST" className="flex-1">
                             <input type="hidden" name="redirect_uri" value={redirect_uri} />
                             <input type="hidden" name="state" value={state ?? ""} />
-                            <Button variant="outline" className="w-full" type="submit">Deny</Button>
+                            <Button variant="outline" className="w-full cursor-pointer" type="submit">Deny</Button>
                         </form>
                         <form action="/api/oauth/authorize" method="POST" className="flex-1">
                             <input type="hidden" name="client_id" value={client_id} />
                             <input type="hidden" name="redirect_uri" value={redirect_uri} />
                             <input type="hidden" name="code_challenge" value={code_challenge} />
                             <input type="hidden" name="state" value={state ?? ""} />
-                            <Button type="submit" className="w-full">Allow</Button>
+                            <Button type="submit" className="w-full cursor-pointer">Allow</Button>
                         </form>
                     </div>
 
                     <p className="text-xs text-muted-foreground text-center">
-                        This allows Claude to read your subscription status. You can revoke access at any time in your account settings.
+                        ou can revoke access at any time in your account settings.
                     </p>
                 </CardContent>
             </Card>
