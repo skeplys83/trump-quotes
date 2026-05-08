@@ -13,11 +13,10 @@ async function getUserIdFromToken(authHeader: string | null): Promise<string | n
 
     const supabaseAdmin = createSupabaseAdmin();
     const { data } = await supabaseAdmin
-        .from("user_api_tokens")
+        .from("oauth_access_tokens")
         .select("user_id")
         .eq("token_hash", tokenHash)
         .maybeSingle();
-
     return data?.user_id ?? null;
 }
 

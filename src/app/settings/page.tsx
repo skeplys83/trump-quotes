@@ -46,9 +46,9 @@ export default function SettingsPage() {
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
-  const [hasToken, setHasToken] = useState(false)
-  const [newToken, setNewToken] = useState<string | null>(null)
-  const [tokenLoading, setTokenLoading] = useState(false)
+  const [oauthClientId, setOauthClientId] = useState<string | null>(null)
+  const [oauthClientSecret, setOauthClientSecret] = useState<string | null>(null)
+  const [secretRevealed, setSecretRevealed] = useState(false)
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -58,7 +58,10 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (!user) return
-    axios.get("/api/user-token").then((res) => setHasToken(res.data.hasToken))
+    axios.get("/api/oauth/client-info").then((res) => {
+      setOauthClientId(res.data.clientId)
+      setOauthClientSecret(res.data.clientSecret)
+    })
   }, [user])
 
   if (isLoading) {
@@ -108,33 +111,6 @@ export default function SettingsPage() {
       setCurrentPassword("")
       setNewPassword("")
       setConfirmPassword("")
-    }
-  }
-
-  async function handleGenerateToken() {
-    setTokenLoading(true)
-    setNewToken(null)
-    try {
-      const res = await axios.post("/api/user-token")
-      setNewToken(res.data.token)
-      setHasToken(true)
-    } catch {
-      toast.error("Failed to generate token.")
-    } finally {
-      setTokenLoading(false)
-    }
-  }
-
-  async function handleRevokeToken() {
-    setTokenLoading(true)
-    setNewToken(null)
-    try {
-      await axios.delete("/api/user-token")
-      setHasToken(false)
-    } catch {
-      toast.error("Failed to revoke token.")
-    } finally {
-      setTokenLoading(false)
     }
   }
 
@@ -243,80 +219,40 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle>AI Assistant Access</CardTitle>
               <CardDescription>
-                Connect an AI assistant like Claude to your subscription data. Generate a personal API token and add it to your AI client once.
+                Connect Claude to your TrumpQuotes account via the claude.ai custom connector.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
-              {newToken ? (
-                <div className="flex flex-col gap-2">
-                  <p className="text-sm font-medium">Your token — save it now, it won&apos;t be shown again:</p>
+              <p className="text-sm text-muted-foreground">
+                Go to <strong>claude.ai → Settings → Integrations → Add custom connector</strong> and fill in:
+              </p>
+              <div className="rounded-md border text-xs divide-y">
+                <div className="flex items-center justify-between px-3 py-2 gap-4">
+                  <span className="text-muted-foreground shrink-0">URL</span>
                   <div className="flex items-center gap-2">
-                    <code className="flex-1 rounded-md bg-muted px-3 py-2 text-xs break-all font-mono">{newToken}</code>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        navigator.clipboard.writeText(newToken)
-                        toast.success("Token copied!")
-                      }}
-                    >
-                      Copy
-                    </Button>
+                    <span className="font-mono truncate">{typeof window !== "undefined" ? window.location.origin : ""}/api/mcp</span>
+                    <Button variant="ghost" size="sm" className="h-6 px-2 shrink-0" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/api/mcp`); toast.success("Copied!") }}>Copy</Button>
                   </div>
-                  <details className="text-sm text-muted-foreground">
-                    <summary className="cursor-pointer select-none">How to connect to Claude Desktop</summary>
-                    <div className="mt-2 flex flex-col gap-2">
-                      <p>Open or create this file:</p>
-                      <code className="rounded-md bg-muted px-3 py-2 text-xs font-mono block">~/Library/Application Support/Claude/claude_desktop_config.json</code>
-                      <p>Add this configuration:</p>
-                      <div className="flex items-start gap-2">
-                        <pre className="flex-1 rounded-md bg-muted px-3 py-2 text-xs font-mono overflow-x-auto whitespace-pre">
-                          {`{
-  "mcpServers": {
-    "trump-quotes": {
-      "url": "${process.env.NEXT_PUBLIC_APP_URL}/api/mcp",
-      "headers": {
-        "Authorization": "Bearer ${newToken}"
-      }
-    }
-  }
-}`}</pre>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="mt-1 shrink-0"
-                          onClick={() => {
-                            const config = JSON.stringify({
-                              mcpServers: {
-                                "trump-quotes": {
-                                  url: `${window.location.origin}/api/mcp`,
-                                  headers: { Authorization: `Bearer ${newToken}` },
-                                },
-                              },
-                            }, null, 2)
-                            navigator.clipboard.writeText(config)
-                            toast.success("Config copied!")
-                          }}
-                        >
-                          Copy config
-                        </Button>
-                      </div>
-                      <p>Restart Claude Desktop. Then ask: <em>&quot;What is my subscription status?&quot;</em></p>
-                    </div>
-                  </details>
                 </div>
-              ) : null}
-
-              <div className="flex gap-2">
-                <Button onClick={handleGenerateToken} disabled={tokenLoading} variant="outline">
-                  {tokenLoading ? "Generating..." : hasToken ? "Regenerate Token" : "Generate Token"}
-                </Button>
-                {hasToken && !newToken && (
-                  <Button onClick={handleRevokeToken} disabled={tokenLoading} variant="ghost" className="text-destructive hover:text-destructive">
-                    {tokenLoading ? "Revoking..." : "Revoke Token"}
-                  </Button>
-                )}
+                <div className="flex items-center justify-between px-3 py-2 gap-4">
+                  <span className="text-muted-foreground shrink-0">OAuth Client ID</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono truncate max-w-48">{oauthClientId ?? "—"}</span>
+                    <Button variant="ghost" size="sm" className="h-6 px-2 shrink-0" onClick={() => { navigator.clipboard.writeText(oauthClientId ?? ""); toast.success("Copied!") }}>Copy</Button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between px-3 py-2 gap-4">
+                  <span className="text-muted-foreground shrink-0">OAuth Client Secret</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono truncate max-w-48">{secretRevealed ? (oauthClientSecret ?? "—") : "••••••••••••••••"}</span>
+                    <Button variant="ghost" size="sm" className="h-6 px-2 shrink-0" onClick={() => setSecretRevealed((v) => !v)}>{secretRevealed ? "Hide" : "Reveal"}</Button>
+                    <Button variant="ghost" size="sm" className="h-6 px-2 shrink-0" onClick={() => { navigator.clipboard.writeText(oauthClientSecret ?? ""); toast.success("Copied!") }}>Copy</Button>
+                  </div>
+                </div>
               </div>
+              <p className="text-sm text-muted-foreground">
+                Click <strong>Add</strong> → log in if prompted → click <strong>Allow</strong>. Then ask Claude: <em>&quot;What is my subscription status?&quot;</em>
+              </p>
             </CardContent>
           </Card>
 

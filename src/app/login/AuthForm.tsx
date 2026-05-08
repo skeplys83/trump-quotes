@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/src/components/shadcn/button"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/src/components/shadcn/field"
 import { Input } from "@/src/components/shadcn/input"
@@ -14,6 +14,8 @@ type Props = {
 
 export function AuthForm({ mode }: Props) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const next = searchParams.get("next") ?? "/"
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -32,7 +34,7 @@ export function AuthForm({ mode }: Props) {
       if (error) {
         setError(error)
       } else {
-        router.push("/")
+        router.push(next)
         router.refresh()
       }
     } else {
