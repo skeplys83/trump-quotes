@@ -37,7 +37,8 @@
     "**/*.mts",
     "src/lib/weather.js",
     "src/app/pagexd.jsx",
-    "src/app/layout.jsx"
+    "src/app/layout.jsx",
+    "src/app/oauth/authorize/page.tsx"
   ],
   "exclude": [
     "node_modules"
