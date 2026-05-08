@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrumpQuotes — OAuth & MCP Documentation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #1a1a1a;
+    background: #fff;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 40px;
+  }
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  h2 { font-size: 20px; font-weight: 700; margin: 40px 0 12px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
+  h3 { font-size: 15px; font-weight: 700; margin: 24px 0 8px; color: #374151; }
+  h4 { font-size: 13px; font-weight: 700; margin: 16px 0 4px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; }
+  p { margin-bottom: 12px; }
+  ul, ol { margin: 8px 0 12px 20px; }
+  li { margin-bottom: 4px; }
+  code {
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    font-size: 12px;
+    background: #f3f4f6;
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: #1f2937;
+  }
+  pre {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    padding: 16px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 12px 0 16px;
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  pre .comment { color: #6c7086; }
+  pre .key { color: #89b4fa; }
+  pre .val { color: #a6e3a1; }
+  pre .str { color: #f9e2af; }
+  pre .kw { color: #cba6f7; }
+  .subtitle { color: #6b7280; margin-bottom: 32px; }
+  .box {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .box.blue { background: #eff6ff; border-color: #bfdbfe; }
+  .box.green { background: #f0fdf4; border-color: #bbf7d0; }
+  .box.yellow { background: #fefce8; border-color: #fde68a; }
+  .box.gray { background: #f9fafb; border-color: #e5e7eb; }
+  .box h4 { margin-top: 0; }
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .flow-step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .flow-step .num {
+    background: #1d4ed8;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 11px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .flow-step .content { flex: 1; padding-bottom: 16px; }
+  .flow-step .content strong { display: block; }
+  .flow-step .content .sub { color: #6b7280; font-size: 12px; }
+  .flow-connector {
+    margin-left: 12px;
+    border-left: 2px dashed #93c5fd;
+    height: 8px;
+  }
+  .diagram {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    padding: 20px 24px;
+    border-radius: 8px;
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    margin: 16px 0;
+    white-space: pre;
+  }
+  .diagram .arrow { color: #89dceb; }
+  .diagram .actor { color: #f9e2af; font-weight: bold; }
+  .diagram .note { color: #a6e3a1; }
+  .diagram .dim { color: #585b70; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 16px;
+    font-size: 13px;
+  }
+  th {
+    background: #f3f4f6;
+    text-align: left;
+    padding: 8px 12px;
+    font-weight: 600;
+    border: 1px solid #e5e7eb;
+  }
+  td {
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    vertical-align: top;
+  }
+  td code { background: transparent; padding: 0; }
+  .tag {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .tag.get { background: #dbeafe; color: #1e40af; }
+  .tag.post { background: #dcfce7; color: #166534; }
+  .tag.any { background: #f3e8ff; color: #6b21a8; }
+  .divider { border: none; border-top: 1px solid #e5e7eb; margin: 32px 0; }
+  @media print {
+    body { padding: 24px 32px; }
+    h2 { page-break-before: auto; }
+    .diagram, pre { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<h1>TrumpQuotes — OAuth &amp; MCP</h1>
+<p class="subtitle">How the Claude AI connector works, end to end. Open in browser → File → Print → Save as PDF.</p>
+
+<hr class="divider">
+
+<!-- ─────────────────────────────────────────────── -->
+<h2>1. The Big Picture</h2>
+
+<p>There are two systems working together here:</p>
+
+<ul>
+  <li><strong>MCP (Model Context Protocol)</strong> — a standard that lets AI assistants call tools on external servers. Claude uses it to ask "what is this user's subscription status?" and get a real answer from your database.</li>
+  <li><strong>OAuth 2.1</strong> — a standard for securely linking two accounts. It lets a TrumpQuotes user say "yes, I authorise Claude to read my subscription data" without giving Claude their password.</li>
+</ul>
+
+<p>Neither system exists without the other here. OAuth gives Claude a secure token that proves who the user is. MCP gives Claude a structured way to call your server using that token.</p>
+
+<div class="box blue">
+  <h4>Analogy</h4>
+  <p>Think of a hotel key card system. OAuth is the front desk that checks your ID and hands you a key card. MCP is the door reader that accepts the key card and lets you in. The front desk doesn't know about the door; the door doesn't know about your ID — they only share the key card.</p>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<h2>2. What is MCP?</h2>
+
+<p>MCP (Model Context Protocol) is an open standard created by Anthropic. It lets AI assistants connect to external "tools" — functions they can call to get real data or perform actions.</p>
+
+<p>Without MCP, Claude only knows what was in its training data. With MCP, Claude can call <em>your</em> server and get live information.</p>
+
+<h3>How a tool call works</h3>
+
+<div class="flow">
+  <div class="flow-step">
+    <div class="num">1</div>
+    <div class="content">
+      <strong>User types a message</strong>
+      <span class="sub">"What is my subscription status?"</span>
+    </div>
+  </div>
+  <div class="flow-connector"></div>
+  <div class="flow-step">
+    <div class="num">2</div>
+    <div class="content">
+      <strong>Claude reads the tool list</strong>
+      <span class="sub">It knows about <code>get_subscription_info</code> because your server declared it.</span>
+    </div>
+  </div>
+  <div class="flow-connector"></div>
+  <div class="flow-step">
+    <div class="num">3</div>
+    <div class="content">
+      <strong>Claude calls the tool</strong>
+      <span class="sub">It sends a POST request to <code>/api/mcp</code> with an Authorization header.</span>
+    </div>
+  </div>
+  <div class="flow-connector"></div>
+  <div class="flow-step">
+    <div class="num">4</div>
+    <div class="content">
+      <strong>Your server responds</strong>
+      <span class="sub">It validates the token, queries Supabase, and returns: <code>Status: active — renews June 3, 2026</code></span>
+    </div>
+  </div>
+  <div class="flow-connector"></div>
+  <div class="flow-step">
+    <div class="num">5</div>
+    <div class="content">
+      <strong>Claude replies to the user</strong>
+      <span class="sub">"Your subscription is active and renews on June 3rd, 2026."</span>
+    </div>
+  </div>
+</div>
+
+<h3>The MCP endpoint: <code>/api/mcp</code></h3>
+<p>This is a single Next.js route that speaks the MCP protocol. It handles GET, POST, and DELETE — all three are needed by the MCP spec for the Streamable HTTP transport. Your server creates a new <code>McpServer</code> instance per request (stateless), connects it to a <code>WebStandardStreamableHTTPServerTransport</code>, and returns the result.</p>
+
+<div class="box gray">
+  <h4>What "stateless" means here</h4>
+  <p>Each request is independent. There is no server-side session between requests — every call re-validates the token and re-queries the database. This is fine for Vercel (serverless) and keeps things simple.</p>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<h2>3. What is OAuth 2.1?</h2>
+
+<p>OAuth is a protocol that lets a user give a third-party application limited access to their account on another service — without sharing their password.</p>
+
+<p>In this case:</p>
+<ul>
+  <li><strong>Resource owner</strong> = the TrumpQuotes user</li>
+  <li><strong>Client</strong> = Claude (the application requesting access)</li>
+  <li><strong>Authorization server</strong> = your TrumpQuotes server (issues tokens)</li>
+  <li><strong>Resource server</strong> = your TrumpQuotes server (the <code>/api/mcp</code> endpoint)</li>
+</ul>
+
+<p>The user never gives Claude their password. Instead, they go through a login &amp; consent flow on your site, and your site gives Claude a token it can use going forward.</p>
+
+<h3>PKCE (Proof Key for Code Exchange)</h3>
+<p>OAuth 2.1 requires PKCE. This prevents a specific attack where someone intercepts the auth code before it reaches Claude. Here's how it works:</p>
+<ol>
+  <li>Before the flow starts, Claude generates a random secret: the <strong>code verifier</strong>.</li>
+  <li>It hashes it with SHA-256 to get the <strong>code challenge</strong>.</li>
+  <li>It sends only the <em>hash</em> to your authorization endpoint (safe to expose).</li>
+  <li>When exchanging the code for a token, Claude proves it holds the original secret by sending the <strong>code verifier</strong>.</li>
+  <li>Your server hashes it again and checks it matches. If someone intercepted the code, they can't use it because they don't have the verifier.</li>
+</ol>
+
+<!-- ─────────────────────────────────────────────── -->
+<h2>4. The Complete Auth Flow</h2>
+
+<p>This is what happens the first time a user adds the TrumpQuotes connector in claude.ai:</p>
+
+<div class="diagram"><span class="actor">User</span>         <span class="actor">claude.ai</span>        <span class="actor">TrumpQuotes Server</span>     <span class="actor">Supabase DB</span>
+  │                │                    │                         │
+  │  Add connector │                    │                         │
+  │  (URL + creds) │                    │                         │
+  │───────────────▶│                    │                         │
+  │                │  GET /.well-known/ │                         │
+  │                │  oauth-auth-server │                         │
+  │                │───────────────────▶│                         │
+  │                │  { auth_endpoint,  │                         │
+  │                │    token_endpoint }│                         │
+  │                │◀───────────────────│                         │
+  │                │                    │                         │
+  │  Browser opens │                    │                         │
+  │◀───────────────│                    │                         │
+  │                                     │                         │
+  │  GET /oauth/authorize               │                         │
+  │  ?client_id=X&code_challenge=Y      │                         │
+  │────────────────────────────────────▶│                         │
+  │                                     │  Check session          │
+  │                                     │────────────────────────▶│
+  │  Show consent page (logged in)      │◀────────────────────────│
+  │◀────────────────────────────────────│                         │
+  │                                     │                         │
+  │  Click "Allow"                      │                         │
+  │────────────────────────────────────▶│                         │
+  │                                     │  Store auth_code hash   │
+  │                                     │  (5 min TTL)            │
+  │                                     │────────────────────────▶│
+  │  Redirect to claude.ai/callback     │                         │
+  │  ?code=RAW_CODE&state=Z             │                         │
+  │◀────────────────────────────────────│                         │
+  │                                     │                         │
+  │               claude.ai receives the code                     │
+  │                │                    │                         │
+  │                │  POST /api/oauth/  │                         │
+  │                │  token             │                         │
+  │                │  { code,           │                         │
+  │                │    code_verifier,  │                         │
+  │                │    client_secret } │                         │
+  │                │───────────────────▶│                         │
+  │                │                    │  Verify PKCE +          │
+  │                │                    │  Look up code hash      │
+  │                │                    │────────────────────────▶│
+  │                │                    │  Mark code as used      │
+  │                │                    │  Store access_token hash│
+  │                │                    │────────────────────────▶│
+  │                │  { access_token }  │                         │
+  │                │◀───────────────────│                         │
+  │                │                    │                         │
+  │                │  Connector ready ✓ │                         │
+  │◀───────────────│                    │                         │</div>
+
+<p>From this point on, every time the user asks Claude about their subscription:</p>
+
+<div class="diagram"><span class="actor">User</span>         <span class="actor">claude.ai</span>        <span class="actor">/api/mcp</span>           <span class="actor">Supabase DB</span>
+  │                │                    │                    │
+  │  "What is my  │                    │                    │
+  │  subscription?"│                    │                    │
+  │───────────────▶│                    │                    │
+  │                │  POST /api/mcp     │                    │
+  │                │  Authorization:    │                    │
+  │                │  Bearer TOKEN      │                    │
+  │                │  tool: get_sub_info│                    │
+  │                │───────────────────▶│                    │
+  │                │                    │  Hash token        │
+  │                │                    │  Look up user_id   │
+  │                │                    │───────────────────▶│
+  │                │                    │  Query weather-    │
+  │                │                    │  subscriptions     │
+  │                │                    │───────────────────▶│
+  │                │  { status, period }│                    │
+  │                │◀───────────────────│                    │
+  │  "Active,      │                    │                    │
+  │  renews Jun 3" │                    │                    │
+  │◀───────────────│                    │                    │</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<h2>5. Your OAuth Endpoints</h2>
+
+<table>
+  <tr>
+    <th>Route</th>
+    <th>Method</th>
+    <th>What it does</th>
+  </tr>
+  <tr>
+    <td><code>/api/.well-known/oauth-authorization-server</code></td>
+    <td><span class="tag get">GET</span></td>
+    <td>Returns a JSON document describing where your auth and token endpoints are. Claude.ai fetches this automatically when you add the connector URL. This is how Claude discovers the full OAuth flow without you telling it manually.</td>
+  </tr>
+  <tr>
+    <td><code>/oauth/authorize</code></td>
+    <td><span class="tag get">GET</span></td>
+    <td>The consent page. Claude redirects the user's browser here. Your server checks if the user is logged in (via Supabase session cookie). If not, redirects to <code>/login</code> first. If yes, shows a "Allow / Deny" card. Also validates <code>client_id</code> — rejects unknown clients.</td>
+  </tr>
+  <tr>
+    <td><code>/api/oauth/authorize</code></td>
+    <td><span class="tag post">POST</span></td>
+    <td>Handles the form submission when the user clicks "Allow". Generates a random one-time code, hashes it with SHA-256, stores the hash + user_id + redirect_uri + PKCE challenge in <code>oauth_auth_codes</code> (expires in 5 minutes). Redirects the browser back to Claude's callback URL with the raw code.</td>
+  </tr>
+  <tr>
+    <td><code>/api/oauth/token</code></td>
+    <td><span class="tag post">POST</span></td>
+    <td>Claude calls this server-to-server (not via browser). Receives the auth code + code_verifier + client credentials. Validates everything: client secret, PKCE, code expiry, redirect URI match, not already used. Issues an access token (random 32 bytes, hashed and stored in <code>oauth_access_tokens</code>). Returns the raw token to Claude.</td>
+  </tr>
+  <tr>
+    <td><code>/api/mcp</code></td>
+    <td><span class="tag any">GET/POST/DELETE</span></td>
+    <td>The MCP server itself. Validates the Bearer token by hashing it and checking <code>oauth_access_tokens</code>. If valid, exposes the <code>get_subscription_info</code> tool. Uses the <code>WebStandardStreamableHTTPServerTransport</code> from the MCP SDK — compatible with Vercel's serverless environment.</td>
+  </tr>
+  <tr>
+    <td><code>/api/oauth/client-info</code></td>
+    <td><span class="tag get">GET</span></td>
+    <td>Returns the OAuth Client ID and Secret for display in the settings page. Only accessible to authenticated users (checks Supabase session). Used so users can copy the credentials into claude.ai's connector dialog.</td>
+  </tr>
+</table>
+
+<!-- ─────────────────────────────────────────────── -->
+<h2>6. Database Tables</h2>
+
+<h3><code>oauth_auth_codes</code></h3>
+<p>Temporary one-time codes. Created when the user clicks Allow, consumed when Claude exchanges it for a token. Expire after 5 minutes and are marked <code>used = true</code> after exchange — preventing replay attacks.</p>
+
+<table>
+  <tr><th>Column</th><th>Type</th><th>Purpose</th></tr>
+  <tr><td><code>code_hash</code></td><td>text</td><td>SHA-256 of the raw code. Raw code is only in the redirect URL, never stored.</td></tr>
+  <tr><td><code>user_id</code></td><td>uuid</td><td>Which TrumpQuotes user approved the request.</td></tr>
+  <tr><td><code>redirect_uri</code></td><td>text</td><td>Where to send the code. Verified on token exchange to prevent open redirect attacks.</td></tr>
+  <tr><td><code>code_challenge</code></td><td>text</td><td>The PKCE hash. Verified against the code_verifier on token exchange.</td></tr>
+  <tr><td><code>expires_at</code></td><td>timestamptz</td><td>5 minutes after creation.</td></tr>
+  <tr><td><code>used</code></td><td>boolean</td><td>Prevents the same code being exchanged twice.</td></tr>
+</table>
+
+<h3><code>oauth_access_tokens</code></h3>
+<p>Long-lived tokens issued after a successful OAuth flow. Each token is tied to one user. When Claude makes an MCP request, it sends the raw token; your server hashes it and looks it up here to find the user.</p>
+
+<table>
+  <tr><th>Column</th><th>Type</th><th>Purpose</th></tr>
+  <tr><td><code>token_hash</code></td><td>text</td><td>SHA-256 of the raw token. Raw token is only ever sent over HTTPS, never stored.</td></tr>
+  <tr><td><code>user_id</code></td><td>uuid</td><td>The TrumpQuotes user this token belongs to.</td></tr>
+  <tr><td><code>created_at</code></td><td>timestamptz</td><td>When the token was issued.</td></tr>
+</table>
+
+<div class="box yellow">
+  <h4>Why are tokens hashed?</h4>
+  <p>If someone ever read your database (a breach, a misconfigured query, etc.), they would only see SHA-256 hashes — useless without the original values. The raw token only exists in two places: the HTTP response when it was issued, and Claude's internal storage. Your server never sees it again after hashing it.</p>
+</div>
+
+<div class="box green">
+  <h4>Why no RLS policies on these tables?</h4>
+  <p>Both tables are accessed exclusively via the Supabase <strong>admin client</strong> (service role key), which bypasses RLS entirely. However, RLS is still <em>enabled</em> with no policies — this means the anon key and user-scoped keys cannot access these tables at all, even accidentally. It's a lockout layer for non-admin access.</p>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<h2>7. Security Properties</h2>
+
+<table>
+  <tr><th>Attack</th><th>How it's prevented</th></tr>
+  <tr>
+    <td>Someone steals the auth code from the redirect URL</td>
+    <td>PKCE: they can't exchange the code without the code verifier, which only Claude holds</td>
+  </tr>
+  <tr>
+    <td>Auth code used twice</td>
+    <td>Codes are marked <code>used = true</code> on first exchange and rejected on reuse</td>
+  </tr>
+  <tr>
+    <td>Auth code used after expiry</td>
+    <td>5-minute TTL enforced on every token exchange</td>
+  </tr>
+  <tr>
+    <td>Unknown application impersonates Claude</td>
+    <td>Client ID + Secret validated on every token exchange</td>
+  </tr>
+  <tr>
+    <td>Token redirected to attacker's server</td>
+    <td>Redirect URI stored in the auth code and verified to match on exchange</td>
+  </tr>
+  <tr>
+    <td>Database breach exposes tokens</td>
+    <td>Only SHA-256 hashes stored — raw tokens never written to the database</td>
+  </tr>
+  <tr>
+    <td>Unauthenticated MCP access</td>
+    <td>Every MCP request validates the token before any tool runs</td>
+  </tr>
+</table>
+
+<!-- ─────────────────────────────────────────────── -->
+<h2>8. File Map</h2>
+
+<table>
+  <tr><th>File</th><th>What it is</th></tr>
+  <tr><td><code>src/app/api/.well-known/oauth-authorization-server/route.ts</code></td><td>OAuth metadata — tells Claude where your endpoints are</td></tr>
+  <tr><td><code>src/app/oauth/authorize/page.tsx</code></td><td>Consent UI — the page the user sees to Allow or Deny</td></tr>
+  <tr><td><code>src/app/api/oauth/authorize/route.ts</code></td><td>Issues auth codes after the user clicks Allow</td></tr>
+  <tr><td><code>src/app/api/oauth/token/route.ts</code></td><td>Exchanges auth codes for access tokens (server-to-server)</td></tr>
+  <tr><td><code>src/app/api/oauth/client-info/route.ts</code></td><td>Returns Client ID + Secret for display in settings</td></tr>
+  <tr><td><code>src/app/api/mcp/route.ts</code></td><td>The MCP server — validates token and exposes tools</td></tr>
+  <tr><td><code>src/app/settings/page.tsx</code></td><td>Settings UI with the connector credentials table</td></tr>
+  <tr><td><code>src/app/login/AuthForm.tsx</code></td><td>Updated to redirect to <code>?next=</code> after login (needed for OAuth redirect)</td></tr>
+</table>
+
+<!-- ─────────────────────────────────────────────── -->
+<h2>9. Environment Variables</h2>
+
+<table>
+  <tr><th>Variable</th><th>Where used</th><th>Notes</th></tr>
+  <tr><td><code>OAUTH_CLIENT_ID</code></td><td>Authorize page, token route, client-info route</td><td>Public identifier for Claude as a client. Same value for all users.</td></tr>
+  <tr><td><code>OAUTH_CLIENT_SECRET</code></td><td>Token route, client-info route</td><td>Proves the token request is from Claude. Treat like a password — add to Vercel env vars, never commit to git.</td></tr>
+</table>
+
+<hr class="divider">
+<p style="color:#9ca3af;font-size:12px;text-align:center;">TrumpQuotes · Generated documentation · OAuth 2.1 + PKCE + MCP Streamable HTTP</p>
+
+</body>
+</html>

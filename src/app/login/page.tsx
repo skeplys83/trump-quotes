@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import Link from "next/link"
 import { Button } from "@/src/components/shadcn/button"
 import { LoginForm } from "./loginForm"
@@ -14,7 +15,9 @@ export default function LoginPage() {
             </div>
             <div className="min-h-screen flex flex-col items-center justify-center px-4">
                 <div className="w-full max-w-md">
-                    <LoginForm />
+                    <Suspense fallback={null}>
+                        <LoginForm />
+                    </Suspense>
                 </div>
             </div>
         </>
