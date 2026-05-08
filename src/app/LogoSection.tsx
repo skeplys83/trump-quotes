@@ -26,7 +26,7 @@ export default function LogoSection() {
             onClick={() => window.dispatchEvent(new CustomEvent("reset-quote"))}
             className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
         >
-            <span className="text-2xl font-bold">Trump Quotes</span>
+            <span className="text-2xl font-bold">Trump Quotes xD</span>
             {isPro && (
                 <span className="text-2xl font-bold bg-linear-to-r from-red-400 to-red-600 bg-clip-text text-transparent">
                     Pro
