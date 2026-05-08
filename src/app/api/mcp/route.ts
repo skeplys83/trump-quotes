@@ -73,7 +73,13 @@ async function handleRequest(request: Request): Promise<Response> {
     const userId = await getUserIdFromToken(request.headers.get("Authorization"));
 
     if (!userId) {
-        return new Response("Unauthorized — provide a valid Bearer token", { status: 401 });
+        const origin = new URL(request.url).origin;
+        return new Response("Unauthorized", {
+            status: 401,
+            headers: {
+                "WWW-Authenticate": `Bearer resource_metadata="${origin}/.well-known/oauth-protected-resource"`,
+            },
+        });
     }
 
     const server = createMcpServer();
