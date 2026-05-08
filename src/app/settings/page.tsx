@@ -56,14 +56,6 @@ export default function SettingsPage() {
     }
   }, [isLoading, user, router])
 
-  useEffect(() => {
-    if (!user) return
-    axios.get("/api/oauth/client-info").then((res) => {
-      setOauthClientId(res.data.clientId)
-      setOauthClientSecret(res.data.clientSecret)
-    })
-  }, [user])
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
