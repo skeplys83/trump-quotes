@@ -93,6 +93,30 @@ function createMcpServer() {
     );
 
     server.registerTool(
+        "get_cancellation_status",
+        {
+            description: "Check whether the subscription is scheduled to cancel at the end of the current billing period.",
+            inputSchema: {},
+        },
+        async (_args, extra) => {
+            const userId = (extra as any).authInfo?.userId;
+            if (!userId) return text("Not authenticated.");
+
+            const sub = await getSubscription(userId);
+            if (!sub) return text("No subscription found.");
+
+            if (sub.subscription_status === "canceling") {
+                const periodEnd = sub.current_period_end
+                    ? new Date(sub.current_period_end).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+                    : "unknown";
+                return text(`Yes — cancellation is scheduled. Access ends on ${periodEnd}.`);
+            }
+
+            return text("No — the subscription is not set to cancel. It will renew automatically.");
+        }
+    );
+
+    server.registerTool(
         "undo_cancellation",
         {
             description: "Reactivate a subscription that was set to cancel at the end of the billing period.",
