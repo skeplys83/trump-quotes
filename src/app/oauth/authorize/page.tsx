@@ -58,8 +58,8 @@ export default async function AuthorizePage({ searchParams }: Props) {
                     </div>
 
                     {/* Text with dotted connector */}
-                    <div className="flex items-center gap-0 w-full justify-center">
-                        <span className="text-sm font-medium">TrumpQuotes</span>
+                    <div className="flex items-center w-full">
+                        <span className="flex-1 text-right text-sm font-semibold text-foreground">TrumpQuotes</span>
 
                         <div className="flex items-center gap-1.5 px-3">
                             <span className="w-1 h-1 rounded-full bg-border" />
@@ -71,7 +71,7 @@ export default async function AuthorizePage({ searchParams }: Props) {
                             <span className="w-1 h-1 rounded-full bg-border" />
                         </div>
 
-                        <span className="text-sm font-medium">{clientName}</span>
+                        <span className="flex-1 text-left text-sm font-semibold text-foreground">{clientName}</span>
                     </div>
 
                     {/* Actions */}
@@ -91,7 +91,7 @@ export default async function AuthorizePage({ searchParams }: Props) {
                     </div>
 
                     <p className="text-xs text-muted-foreground text-center">
-                        ou can revoke access at any time in your account settings.
+                        you can revoke access at any time in your account settings.
                     </p>
                 </CardContent>
             </Card>
