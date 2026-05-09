@@ -4,7 +4,11 @@ A full-stack SaaS learning project built with Next.js. Users can sign up, subscr
 
 ![App screenshot](public/page.png)
 
----
+<p align="center"><img src="public/plans.png" width="60%"></p>
+<table><tr>
+<td align="center"><img src="public/ai-access.png"></td>
+<td align="center"><img src="public/claude.png" width="85%"></td>
+</tr></table>
 
 ## What It Does
 
@@ -14,7 +18,7 @@ A full-stack SaaS learning project built with Next.js. Users can sign up, subscr
 - **Free preview** — unauthenticated users get 3 free quotes tracked in `localStorage` (client-side only, no server enforcement)
 - **Account management** — users can update their password, manage/cancel their subscription, and delete their account
 - **Stripe billing** — checkout, webhook handling, customer portal, and subscription cancellation
-- **AI assistant integration** — OAuth 2.1 + PKCE flow lets Claude AI connect to a user's account; an MCP server exposes tools for subscription management and quote fetching
+- **AI assistant integration** — Claude AI can connect to a user's account via OAuth 2.1 + PKCE and call live tools (fetch quotes, manage subscriptions) through an MCP server. See [`docs/oauth-mcp-explainer.html`](docs/oauth-mcp-explainer.html) for the full technical breakdown.
 - **Legal pages** — Privacy Policy, Terms of Service, Imprint, Right of Withdrawal
 
 ---
