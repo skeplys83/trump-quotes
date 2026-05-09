@@ -18,7 +18,7 @@ A full-stack SaaS learning project built with Next.js, Stripe, Supabase, and AI 
 - **Free preview** — unauthenticated users get 3 free quotes tracked in `localStorage` (client-side only, no server enforcement)
 - **Account management** — users can update their password, manage/cancel their subscription, and delete their account
 - **Stripe billing** — checkout, webhook handling, customer portal, and subscription cancellation
-- **AI assistant integration** — AI Chatbots can connect to a user's account via OAuth 2.1 + PKCE and call live tools (`get_quote`, `get_subscription_info`, `get_cancellation_status`, `cancel_subscription`, `undo_cancellation`, `subscribe`) through an MCP server. See [`docs/oauth-mcp-explainer.html`](docs/oauth-mcp-explainer.html) for the full technical breakdown.
+- **AI assistant integration** — AI Chatbots can connect to a user's account via OAuth 2.1 + PKCE and call live tools (`get_quote`, `get_subscription_info`, `get_cancellation_status`, `cancel_subscription`, `undo_cancellation`, `subscribe`) through an MCP server. See [`docs/oauth-mcp-explainer.pdf`](docs/oauth-mcp-explainer.pdf) for the full technical breakdown.
 - **Legal pages** — Privacy Policy, Terms of Service, Imprint, Right of Withdrawal
 
 ---
@@ -136,7 +136,7 @@ OAUTH_CLIENT_SECRET=
 
 All tables are accessed via the admin client (service role). Enable RLS on all of them with no policies — this blocks any non-admin access entirely.
 
-For `oauth_auth_codes`, set up a pg_cron job to purge used/expired rows (see [`docs/oauth-mcp-explainer.html`](docs/oauth-mcp-explainer.html)).
+For `oauth_auth_codes`, set up a pg_cron job to purge used/expired rows (see [`docs/oauth-mcp-explainer.pdf`](docs/oauth-mcp-explainer.pdf)).
 
 **Auth providers** — enable under Authentication → Providers:
 - **Email** — turn on "Require current password when updating"
@@ -222,7 +222,7 @@ On every MCP tool call
 ```
 
 The six MCP tools are: `get_quote`, `get_subscription_info`, `get_cancellation_status`, `cancel_subscription`, `undo_cancellation`, `subscribe`.
-See `docs/oauth-mcp-explainer.html` for the full technical reference.
+See `docs/oauth-mcp-explainer.pdf` for the full technical reference.
 
 ---
 
