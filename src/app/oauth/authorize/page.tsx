@@ -67,8 +67,9 @@ export default async function AuthorizePage({ searchParams }: Props) {
 
                     {/* Icon + dotted connector */}
                     <div className="flex items-center w-full">
-                        <div className="flex-1 flex justify-end">
-                            <Image src="/favicon.svg" alt="TrumpQuotes" width={24} height={24} />
+                        <div className="flex-1 flex items-center justify-end gap-1.5">
+                            <span className="text-sm font-semibold text-foreground">TrumpQuotes</span>
+                            <Image src="/favicon.svg" alt="TrumpQuotes" width={20} height={20} />
                         </div>
 
                         <div className="flex items-center gap-1.5 px-3">
