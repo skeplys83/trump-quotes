@@ -26,7 +26,7 @@ async function getUserIdFromToken(authHeader: string | null): Promise<string | n
 async function getSubscription(userId: string) {
     const supabaseAdmin = createSupabaseAdmin();
     const { data } = await supabaseAdmin
-        .from("weather-subscriptions")
+        .from("subscriptions")
         .select("*")
         .eq("customer_id", userId)
         .maybeSingle();
@@ -80,7 +80,7 @@ function createMcpServer() {
 
             const supabaseAdmin = createSupabaseAdmin();
             await supabaseAdmin
-                .from("weather-subscriptions")
+                .from("subscriptions")
                 .update({ subscription_status: "canceling" })
                 .eq("customer_id", userId);
 
@@ -134,7 +134,7 @@ function createMcpServer() {
 
             const supabaseAdmin = createSupabaseAdmin();
             await supabaseAdmin
-                .from("weather-subscriptions")
+                .from("subscriptions")
                 .update({ subscription_status: "active" })
                 .eq("customer_id", userId);
 
@@ -175,7 +175,7 @@ function createMcpServer() {
 
             const session = await stripe.checkout.sessions.create({
                 mode: "subscription",
-                line_items: [{ price: process.env.STRIPE_WEATHER_PRICE_ID!, quantity: 1 }],
+                line_items: [{ price: process.env.STRIPE_PRICE_ID!, quantity: 1 }],
                 success_url: `${process.env.NEXT_PUBLIC_APP_URL}/processing`,
                 cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/billing/cancel`,
                 customer: customerId,

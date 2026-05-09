@@ -15,7 +15,7 @@ export async function getSubscription() {
 
     const supabaseAdmin = createSupabaseAdmin();
     const { data } = await supabaseAdmin
-        .from("weather-subscriptions")
+        .from("subscriptions")
         .select("*")
         .eq("customer_id", user.id)
         .maybeSingle();

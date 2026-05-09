@@ -16,7 +16,7 @@ export default async function Page() {
   if (user) {
     const supabaseAdmin = createSupabaseAdmin();
     const { data } = await supabaseAdmin
-      .from("weather-subscriptions")
+      .from("subscriptions")
       .select("subscription_status")
       .eq("customer_id", user.id)
       .maybeSingle();

@@ -1,6 +1,6 @@
 # Trump Quotes
 
-A full-stack SaaS learning project built with Next.js. Users can sign up, subscribe via Stripe, and receive random Donald Trump quotes from an external API. Built to practice integrating Vercel, Supabase, Stripe, and third-party APIs end-to-end.
+A full-stack SaaS learning project built with Next.js, Stripe, Supabase, and AI Chatbot integration via MCP.
 
 ![App screenshot](public/page.png)
 
@@ -18,7 +18,7 @@ A full-stack SaaS learning project built with Next.js. Users can sign up, subscr
 - **Free preview** — unauthenticated users get 3 free quotes tracked in `localStorage` (client-side only, no server enforcement)
 - **Account management** — users can update their password, manage/cancel their subscription, and delete their account
 - **Stripe billing** — checkout, webhook handling, customer portal, and subscription cancellation
-- **AI assistant integration** — Claude AI can connect to a user's account via OAuth 2.1 + PKCE and call live tools (fetch quotes, manage subscriptions) through an MCP server. See [`docs/oauth-mcp-explainer.html`](docs/oauth-mcp-explainer.html) for the full technical breakdown.
+- **AI assistant integration** — AI Chatbots can connect to a user's account via OAuth 2.1 + PKCE and call live tools (`get_quote`, `get_subscription_info`, `get_cancellation_status`, `cancel_subscription`, `undo_cancellation`, `subscribe`) through an MCP server. See [`docs/oauth-mcp-explainer.html`](docs/oauth-mcp-explainer.html) for the full technical breakdown.
 - **Legal pages** — Privacy Policy, Terms of Service, Imprint, Right of Withdrawal
 
 ---
@@ -45,9 +45,13 @@ A full-stack SaaS learning project built with Next.js. Users can sign up, subscr
 ```
 src/
 ├── app/
+│   ├── .well-known/
+│   │   ├── oauth-authorization-server/  # RFC 8414 — auth server metadata (token + auth endpoints)
+│   │   └── oauth-protected-resource/    # RFC 9728 — resource metadata (triggers OAuth discovery)
 │   ├── api/
 │   │   ├── account/delete/     # Delete user account + Stripe customer
 │   │   ├── auth/callback/      # OAuth redirect handler (code → session)
+│   │   ├── image-proxy/        # Proxy external images (avoids mixed-content issues)
 │   │   ├── stripe/
 │   │   │   ├── checkout/       # Create Stripe checkout session
 │   │   │   ├── cancel/         # Cancel active subscription
@@ -58,12 +62,14 @@ src/
 │   │   │   ├── reject/         # POST: redirect back with error=access_denied after Deny
 │   │   │   ├── token/          # POST: exchange auth code for access token (server-to-server)
 │   │   │   └── connections/    # GET list / DELETE one access token (used by settings page)
-│   │   ├── mcp/                # MCP server — validates token, exposes 5 tools over Streamable HTTP
+│   │   ├── mcp/                # MCP server — validates token, exposes 6 tools over Streamable HTTP
 │   │   ├── subscription/       # GET current user subscription status
-│   │   └── trump-quote/        # GET random quote (auth + active subscription); /free for guests (3-quote localStorage gate)
+│   │   ├── trump-quote/        # GET random quote (auth + active subscription); /free for guests
+│   │   └── user-token/         # GET Supabase session token for client-side use
+│   ├── oauth/authorize/        # OAuth consent page (Allow / Deny UI)
 │   ├── login/                  # Auth UI (sign in, sign up, forgot password)
 │   ├── plans/                  # Pricing page + subscription button
-│   ├── settings/               # Account settings (password, plans, delete)
+│   ├── settings/               # Account settings (password, plans, AI access, delete)
 │   ├── billing/cancel/         # Post-cancellation redirect page
 │   ├── processing/             # Polls for subscription activation after checkout
 │   └── legal/                  # Privacy, Terms, Imprint, Withdrawal pages
@@ -94,11 +100,7 @@ SUPABASE_SECRET_KEY=
 # Stripe
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
-STRIPE_WEATHER_PRICE_ID=
-
-# Google OAuth (configured in Supabase dashboard, not used directly in app code)
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
+STRIPE_PRICE_ID=
 
 # OAuth / MCP (Claude AI connector)
 OAUTH_CLIENT_ID=
@@ -118,36 +120,30 @@ OAUTH_CLIENT_SECRET=
 
 ### Supabase
 
-**Project setup**
-
 1. Create a new Supabase project
 2. Copy the project URL → `NEXT_PUBLIC_SUPABASE_URL`
 3. Copy the anon/publishable key → `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`
 4. Copy the service role key → `SUPABASE_SECRET_KEY`
 
-**Database table**
+**Database tables**
 
-Create a table called `weather-subscriptions` with these columns:
+| Table | Key columns |
+| ----- | ----------- |
+| `subscriptions` | `customer_id` (uuid, PK), `stripe_subscription_id` (text), `subscription_status` (text), `current_period_end` (timestamptz) |
+| `oauth_auth_codes` | `code_hash` (text), `user_id` (uuid), `redirect_uri` (text), `code_challenge` (text), `expires_at` (timestamptz), `used` (boolean) |
+| `oauth_access_tokens` | `token_hash` (text), `user_id` (uuid), `client_name` (text), `created_at` (timestamptz) |
+| `user_api_tokens` | `user_id` (uuid), `token_hash` (text), `created_at` (timestamptz) |
 
-| Column                   | Type          | Notes                                           |
-| ------------------------ | ------------- | ----------------------------------------------- |
-| `customer_id`            | `uuid`        | Primary key, linked to Supabase `auth.users.id` |
-| `stripe_subscription_id` | `text`        | Nullable — set by webhook after payment         |
-| `subscription_status`    | `text`        | `incomplete`, `active`, `past_due`, etc.        |
-| `current_period_end`     | `timestamptz` | Nullable — set by webhook                       |
+All tables are accessed via the admin client (service role). Enable RLS on all of them with no policies — this blocks any non-admin access entirely.
 
-**Auth providers**
+For `oauth_auth_codes`, set up a pg_cron job to purge used/expired rows (see [`docs/oauth-mcp-explainer.html`](docs/oauth-mcp-explainer.html)).
 
-Go to **Authentication → Providers** and enable:
+**Auth providers** — enable under Authentication → Providers:
+- **Email** — turn on "Require current password when updating"
+- **Google** — paste client ID + secret from Google Cloud Console
+- **Twitter/X** — paste API key + secret from developer.twitter.com
 
-- **Email** — enable; turn on "Require current password when updating"
-- **Google** — enable; paste your Google OAuth client ID and secret (from Google Cloud Console → Credentials)
-- **Twitter/X** — enable; paste your X app API key and secret (from developer.twitter.com)
-
-**Redirect URLs**
-
-Under **Authentication → URL Configuration**, add to the allowed redirect list:
-
+**Redirect URLs** — add under Authentication → URL Configuration:
 ```
 https://your-app.vercel.app/api/auth/callback
 http://localhost:3000/api/auth/callback
@@ -161,7 +157,7 @@ http://localhost:3000/api/auth/callback
 
 1. Create a product (e.g. "Trump Quotes Pro")
 2. Add a recurring monthly price
-3. Copy the price ID → `STRIPE_WEATHER_PRICE_ID`
+3. Copy the price ID → `STRIPE_PRICE_ID`
 4. Copy your secret key → `STRIPE_SECRET_KEY`
 
 **Webhook**
@@ -187,7 +183,7 @@ The CLI prints a temporary signing secret — use that as `STRIPE_WEBHOOK_SECRET
 
 **Customer identification**
 
-When a Stripe customer is created during checkout, the app stores the Supabase `user.id` in the customer's `metadata.supabase_user_id` field. The webhook uses this to look up and update the correct row in `weather-subscriptions`.
+When a Stripe customer is created during checkout, the app stores the Supabase `user.id` in the customer's `metadata.supabase_user_id` field. The webhook uses this to look up and update the correct row in `subscriptions`.
 
 ---
 

@@ -16,7 +16,7 @@ export async function GET() {
     }
 
     const { data } = await supabaseAdmin
-        .from("weather-subscriptions")
+        .from("subscriptions")
         .select("subscription_status")
         .eq("customer_id", user.id)
         .maybeSingle();

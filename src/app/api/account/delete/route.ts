@@ -14,7 +14,7 @@ export async function DELETE() {
   const admin = createSupabaseAdmin()
 
   const { data: subscription, error: subFetchError } = await admin
-    .from("weather-subscriptions")
+    .from("subscriptions")
     .select("*")
     .eq("customer_id", user.id)
     .maybeSingle()
@@ -45,7 +45,7 @@ export async function DELETE() {
     }
 
     const { error: subDeleteError } = await admin
-      .from("weather-subscriptions")
+      .from("subscriptions")
       .delete()
       .eq("customer_id", user.id)
 

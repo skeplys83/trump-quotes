@@ -67,7 +67,7 @@ export async function POST(req: Request) {
                 }
 
                 const { error } = await supabase
-                    .from("weather-subscriptions")
+                    .from("subscriptions")
                     .update({
                         stripe_subscription_id: subscription.id,
                         subscription_status: subscription.status,
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
                 }
 
                 const { error } = await supabase
-                    .from("weather-subscriptions")
+                    .from("subscriptions")
                     .update({ subscription_status: "past_due" })
                     .eq("customer_id", userId);
 
@@ -115,7 +115,7 @@ export async function POST(req: Request) {
                 }
 
                 const { error } = await supabase
-                    .from("weather-subscriptions")
+                    .from("subscriptions")
                     .update({ subscription_status: subscription.status })
                     .eq("customer_id", userId);
 
@@ -138,7 +138,7 @@ export async function POST(req: Request) {
 
                 // Delete the subscription from the database
                 const { error } = await supabase
-                    .from("weather-subscriptions")
+                    .from("subscriptions")
                     .delete()
                     .eq("customer_id", userId);
 

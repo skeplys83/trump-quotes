@@ -22,7 +22,7 @@ export async function POST() {
         // Get the user's subscription from the database
         const supabaseAdmin = createSupabaseAdmin();
         const { data: subscription, error: fetchError } = await supabaseAdmin
-            .from("weather-subscriptions")
+            .from("subscriptions")
             .select("*")
             .eq("customer_id", user.id)
             .maybeSingle();

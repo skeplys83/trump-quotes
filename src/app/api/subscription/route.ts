@@ -23,7 +23,7 @@ export async function GET() {
 
         const supabaseAdmin = createSupabaseAdmin();
         const { data, error } = await supabaseAdmin
-            .from("weather-subscriptions")
+            .from("subscriptions")
             .select("*")
             .eq("customer_id", user.id)
             .maybeSingle();
@@ -44,7 +44,7 @@ export async function GET() {
 
         if (res.status === "canceled" || res.status === "incomplete_expired") {
             const { error: deleteError } = await supabaseAdmin
-                .from("weather-subscriptions")
+                .from("subscriptions")
                 .delete()
                 .eq("customer_id", user.id);
 
