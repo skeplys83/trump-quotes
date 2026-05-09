@@ -2,6 +2,8 @@ import { redirect } from "next/navigation"
 import { createSupabaseServer } from "@/src/lib/supabase/supabaseServer"
 import { Card, CardContent } from "@/src/components/shadcn/card"
 import { Button } from "@/src/components/shadcn/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/shadcn/avatar"
+import Image from "next/image"
 
 interface Props {
     searchParams: Promise<{
@@ -50,16 +52,24 @@ export default async function AuthorizePage({ searchParams }: Props) {
                 <CardContent className="pt-8 pb-6 px-6 flex flex-col items-center gap-6">
 
                     {/* Heading */}
-                    <div className="text-center flex flex-col gap-1">
+                    <div className="text-center flex flex-col gap-2">
                         <h1 className="text-lg font-semibold">{clientName} wants to connect</h1>
-                        <p className="text-sm text-muted-foreground">
-                            Signed in as <span className="font-medium text-foreground">{user!.email}</span>
-                        </p>
+                        <div className="flex items-center justify-center gap-2">
+                            <Avatar className="w-5 h-5">
+                                <AvatarImage src={user!.user_metadata?.avatar_url ?? user!.user_metadata?.picture} />
+                                <AvatarFallback className="text-[10px]">{(user!.email ?? "?").charAt(0).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <p className="text-sm text-muted-foreground">
+                                Signed in as <span className="font-medium text-foreground">{user!.email}</span>
+                            </p>
+                        </div>
                     </div>
 
-                    {/* Text with dotted connector */}
+                    {/* Icon + dotted connector */}
                     <div className="flex items-center w-full">
-                        <span className="flex-1 text-right text-sm font-semibold text-foreground">TrumpQuotes</span>
+                        <div className="flex-1 flex justify-end">
+                            <Image src="/favicon.svg" alt="TrumpQuotes" width={24} height={24} />
+                        </div>
 
                         <div className="flex items-center gap-1.5 px-3">
                             <span className="w-1 h-1 rounded-full bg-border" />
@@ -71,7 +81,7 @@ export default async function AuthorizePage({ searchParams }: Props) {
                             <span className="w-1 h-1 rounded-full bg-border" />
                         </div>
 
-                        <span className="flex-1 text-left text-sm font-semibold text-foreground">{clientName}</span>
+                        <span className="flex-1 text-left text-sm font-semibold text-foreground pl-0">{clientName}</span>
                     </div>
 
                     {/* Actions */}
