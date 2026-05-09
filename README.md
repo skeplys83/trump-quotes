@@ -4,11 +4,11 @@ A full-stack SaaS learning project built with Next.js. Users can sign up, subscr
 
 ![App screenshot](public/page.png)
 
-<p align="center"><img src="public/plans.png" width="60%"></p>
-<table><tr>
-<td align="center"><img src="public/ai-access.png"></td>
-<td align="center"><img src="public/claude.png" width="85%"></td>
-</tr></table>
+<p align="center">
+<img src="public/plans.png" width="90%"><br><br>
+<img src="public/ai-access.png" width="90%"><br><br>
+<img src="public/claude.png" width="90%">
+</p>
 
 ## What It Does
 
