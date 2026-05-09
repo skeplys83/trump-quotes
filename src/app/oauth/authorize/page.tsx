@@ -2,7 +2,6 @@ import { redirect } from "next/navigation"
 import { createSupabaseServer } from "@/src/lib/supabase/supabaseServer"
 import { Card, CardContent } from "@/src/components/shadcn/card"
 import { Button } from "@/src/components/shadcn/button"
-import Image from "next/image"
 
 interface Props {
     searchParams: Promise<{
@@ -18,6 +17,8 @@ interface Props {
 export default async function AuthorizePage({ searchParams }: Props) {
     const params = await searchParams
     const { client_id, redirect_uri, code_challenge, state, response_type } = params
+
+    const clientName = (() => { try { return new URL(redirect_uri ?? "").hostname } catch { return "Claude" } })()
 
     if (!client_id || !redirect_uri || !code_challenge || response_type !== "code") {
         return (
@@ -50,38 +51,27 @@ export default async function AuthorizePage({ searchParams }: Props) {
 
                     {/* Heading */}
                     <div className="text-center flex flex-col gap-1">
-                        <h1 className="text-lg font-semibold">Claude wants to connect</h1>
+                        <h1 className="text-lg font-semibold">{clientName} wants to connect</h1>
                         <p className="text-sm text-muted-foreground">
                             Signed in as <span className="font-medium text-foreground">{user!.email}</span>
                         </p>
                     </div>
 
-                    {/* Icons with dotted connector */}
+                    {/* Text with dotted connector */}
                     <div className="flex items-center gap-0 w-full justify-center">
-                        <div className="w-14 h-14 rounded-2xl border bg-background shadow-sm flex items-center justify-center shrink-0">
-                            <Image src="/favicon.svg" alt="TrumpQuotes" width={36} height={36} />
-                        </div>
+                        <span className="text-sm font-medium">TrumpQuotes</span>
 
                         <div className="flex items-center gap-1.5 px-3">
-                            <span className="w-1.5 h-1.5 rounded-full bg-border" />
-                            <span className="w-1.5 h-1.5 rounded-full bg-border" />
-                            <span className="w-1.5 h-1.5 rounded-full bg-border" />
-                            <span className="w-1.5 h-1.5 rounded-full bg-border" />
-                            <span className="w-1.5 h-1.5 rounded-full bg-border" />
-                            <span className="w-1.5 h-1.5 rounded-full bg-border" />
-                            <span className="w-1.5 h-1.5 rounded-full bg-border" />
+                            <span className="w-1 h-1 rounded-full bg-border" />
+                            <span className="w-1 h-1 rounded-full bg-border" />
+                            <span className="w-1 h-1 rounded-full bg-border" />
+                            <span className="w-1 h-1 rounded-full bg-border" />
+                            <span className="w-1 h-1 rounded-full bg-border" />
+                            <span className="w-1 h-1 rounded-full bg-border" />
+                            <span className="w-1 h-1 rounded-full bg-border" />
                         </div>
 
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <div className="w-14 h-14 rounded-2xl border bg-[#cc785c] shadow-sm flex items-center justify-center shrink-0 overflow-hidden">
-                            <img
-                                src="https://claude.ai/favicon.ico"
-                                alt="Claude"
-                                width={36}
-                                height={36}
-                                className="w-9 h-9 object-contain"
-                            />
-                        </div>
+                        <span className="text-sm font-medium">{clientName}</span>
                     </div>
 
                     {/* Actions */}

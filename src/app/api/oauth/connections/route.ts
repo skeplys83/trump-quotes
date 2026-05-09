@@ -15,7 +15,7 @@ export async function GET() {
     const supabaseAdmin = createSupabaseAdmin()
     const { data, error } = await supabaseAdmin
         .from("oauth_access_tokens")
-        .select("id, created_at")
+        .select("id, created_at, client_name")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
 

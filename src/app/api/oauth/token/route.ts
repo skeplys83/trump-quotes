@@ -77,9 +77,12 @@ export async function POST(request: Request) {
     const rawToken = randomBytes(32).toString("hex")
     const tokenHash = createHash("sha256").update(rawToken).digest("hex")
 
+    const clientName = (() => { try { return new URL(redirect_uri).hostname } catch { return redirect_uri } })()
+
     const { error: insertError } = await supabaseAdmin.from("oauth_access_tokens").insert({
         token_hash: tokenHash,
         user_id: authCode.user_id,
+        client_name: clientName,
     })
 
     if (insertError) {

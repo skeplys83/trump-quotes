@@ -6,7 +6,7 @@ import { LoaderIcon } from "lucide-react"
 import { Button } from "@/src/components/shadcn/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/shadcn/card"
 
-type Connection = { id: string; created_at: string }
+type Connection = { id: string; created_at: string; client_name: string }
 
 export function AiAccessCard() {
   const [connections, setConnections] = useState<Connection[]>([])
@@ -43,7 +43,7 @@ export function AiAccessCard() {
               {connections.map((c) => (
                 <div key={c.id} className="flex items-center justify-between px-3 py-2 gap-4">
                   <div className="flex flex-col">
-                    <span className="text-sm">Claude.ai</span>
+                    <span className="text-sm">{c.client_name}</span>
                     <span className="text-xs text-muted-foreground">
                       Connected {new Date(c.created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
                     </span>

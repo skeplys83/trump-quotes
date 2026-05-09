@@ -102,7 +102,7 @@ function createMcpServer() {
             const userId = (extra as any).authInfo?.userId;
             if (!userId) return text("Not authenticated.");
 
-            const sub = await getSubscription(userId);
+            const sub = await getSubscription(userId); //TODO: fetch from stripe, not supabase, to get real-time status
             if (!sub) return text("No subscription found.");
 
             if (sub.subscription_status === "canceling") {

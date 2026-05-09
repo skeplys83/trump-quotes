@@ -14,6 +14,7 @@ A full-stack SaaS learning project built with Next.js. Users can sign up, subscr
 - **Free preview** — unauthenticated users get 3 free quotes tracked in `localStorage` (client-side only, no server enforcement)
 - **Account management** — users can update their password, manage/cancel their subscription, and delete their account
 - **Stripe billing** — checkout, webhook handling, customer portal, and subscription cancellation
+- **AI assistant integration** — OAuth 2.1 + PKCE flow lets Claude AI connect to a user's account; an MCP server exposes tools for subscription management and quote fetching
 - **Legal pages** — Privacy Policy, Terms of Service, Imprint, Right of Withdrawal
 
 ---
@@ -48,6 +49,12 @@ src/
 │   │   │   ├── cancel/         # Cancel active subscription
 │   │   │   ├── portal/         # Redirect to Stripe customer portal
 │   │   │   └── webhook/        # Handle Stripe events (invoice.paid, etc.)
+│   │   ├── oauth/
+│   │   │   ├── authorize/      # POST: issue auth code after user clicks Allow
+│   │   │   ├── reject/         # POST: redirect back with error=access_denied after Deny
+│   │   │   ├── token/          # POST: exchange auth code for access token (server-to-server)
+│   │   │   └── connections/    # GET list / DELETE one access token (used by settings page)
+│   │   ├── mcp/                # MCP server — validates token, exposes 5 tools over Streamable HTTP
 │   │   ├── subscription/       # GET current user subscription status
 │   │   └── trump-quote/        # GET random quote (auth + active subscription); /free for guests (3-quote localStorage gate)
 │   ├── login/                  # Auth UI (sign in, sign up, forgot password)
@@ -89,6 +96,9 @@ STRIPE_WEATHER_PRICE_ID=
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 
+# OAuth / MCP (Claude AI connector)
+OAUTH_CLIENT_ID=
+OAUTH_CLIENT_SECRET=
 ```
 
 ---
@@ -187,6 +197,32 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000).
 
 For the full checkout and subscription flow, run the Stripe CLI forwarder in a separate terminal alongside the dev server.
+
+---
+
+## OAuth / MCP Flow (Claude AI Connector)
+
+```
+User adds connector in claude.ai
+  → Claude discovers OAuth endpoints via /.well-known/* metadata
+  → Browser redirected to /oauth/authorize (consent page)
+  → User clicks Allow → POST /api/oauth/authorize
+  → Server stores auth code hash (5-min TTL) in oauth_auth_codes
+  → Browser redirected to claude.ai/callback?code=RAW_CODE
+
+claude.ai exchanges the code
+  → POST /api/oauth/token { code, code_verifier, client_secret }
+  → Server verifies PKCE, marks code as used
+  → Issues 30-day access token stored as hash in oauth_access_tokens
+  → Claude stores the token and is now connected
+
+On every MCP tool call
+  → Claude sends Authorization: Bearer TOKEN to POST /api/mcp
+  → Server hashes token, looks up user_id, runs the tool
+```
+
+The six MCP tools are: `get_quote`, `get_subscription_info`, `get_cancellation_status`, `cancel_subscription`, `undo_cancellation`, `subscribe`.
+See `docs/oauth-mcp-explainer.html` for the full technical reference.
 
 ---
 

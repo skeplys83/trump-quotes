@@ -232,7 +232,7 @@
 <!-- ─────────────────────────────────────────────── -->
 <h2>3. MCP Tools</h2>
 
-<p>Your server exposes five tools. All tools require a valid OAuth Bearer token — if the user is not authenticated, every tool returns "Not authenticated." before doing anything.</p>
+<p>Your server exposes six tools. All tools require a valid OAuth Bearer token — if the user is not authenticated, every tool returns "Not authenticated." before doing anything.</p>
 
 <table>
   <tr>
@@ -244,6 +244,11 @@
     <td><code>get_subscription_info</code></td>
     <td>Returns the user's current subscription status and the date the current billing period ends. Queries <code>weather-subscriptions</code> directly.</td>
     <td>No — works for any authenticated user including those without a subscription.</td>
+  </tr>
+  <tr>
+    <td><code>get_cancellation_status</code></td>
+    <td>Checks whether the subscription is currently scheduled to cancel at the end of the billing period. Returns the scheduled end date if cancellation is pending, or confirms the subscription will auto-renew.</td>
+    <td>No — works for any authenticated user (returns "No subscription found" if none exists).</td>
   </tr>
   <tr>
     <td><code>cancel_subscription</code></td>
@@ -444,7 +449,7 @@
   <tr>
     <td><code>/api/oauth/connections</code></td>
     <td><span class="tag get">GET</span></td>
-    <td>Returns a list of active OAuth connections (access tokens) for the currently logged-in user. Used by the settings page to display connected assistants. Returns <code>[{ id, created_at }]</code>.</td>
+    <td>Returns a list of active OAuth connections (access tokens) for the currently logged-in user. Used by the settings page to display connected assistants. Returns <code>[{ id, created_at, client_name }]</code>.</td>
   </tr>
   <tr>
     <td><code>/api/oauth/connections</code></td>
@@ -452,14 +457,9 @@
     <td>Deletes a specific access token by ID, scoped to the current user. Used by the "Disconnect" button in settings. Revoking a token means Claude's next MCP call will return 401 and the user will need to reconnect.</td>
   </tr>
   <tr>
-    <td><code>/api/oauth/client-info</code></td>
-    <td><span class="tag get">GET</span></td>
-    <td>Returns <code>OAUTH_CLIENT_ID</code> and <code>OAUTH_CLIENT_SECRET</code> for display in the settings page. Only accessible to authenticated users (checks Supabase session).</td>
-  </tr>
-  <tr>
     <td><code>/api/mcp</code></td>
     <td><span class="tag any">GET/POST/DELETE</span></td>
-    <td>The MCP server. On 401, returns a <code>WWW-Authenticate: Bearer resource_metadata=</code> header to trigger OAuth discovery. On valid token, exposes all five tools (see Section 3). Uses <code>WebStandardStreamableHTTPServerTransport</code> — stateless, compatible with Vercel.</td>
+    <td>The MCP server. On 401, returns a <code>WWW-Authenticate: Bearer resource_metadata=</code> header to trigger OAuth discovery. On valid token, exposes all six tools (see Section 3). Uses <code>WebStandardStreamableHTTPServerTransport</code> — stateless, compatible with Vercel.</td>
   </tr>
 </table>
 
@@ -486,6 +486,7 @@
   <tr><th>Column</th><th>Type</th><th>Purpose</th></tr>
   <tr><td><code>token_hash</code></td><td>text</td><td>SHA-256 of the raw token. Raw token is only ever sent over HTTPS, never stored.</td></tr>
   <tr><td><code>user_id</code></td><td>uuid</td><td>The TrumpQuotes user this token belongs to.</td></tr>
+  <tr><td><code>client_name</code></td><td>text</td><td>Hostname extracted from the <code>redirect_uri</code> at token exchange time (e.g. <code>claude.ai</code>). Displayed in the settings page next to the connection date.</td></tr>
   <tr><td><code>created_at</code></td><td>timestamptz</td><td>When the token was issued. Displayed in the settings page as the connection date.</td></tr>
 </table>
 
@@ -577,8 +578,7 @@ View the cron jobs in the Supabase dashboard under <strong>Database → Cron Job
   <tr><td><code>src/app/api/oauth/reject/route.ts</code></td><td>Redirects back to Claude with error=access_denied after Deny</td></tr>
   <tr><td><code>src/app/api/oauth/token/route.ts</code></td><td>Exchanges auth codes for access tokens (server-to-server)</td></tr>
   <tr><td><code>src/app/api/oauth/connections/route.ts</code></td><td>GET list / DELETE one access token — used by settings page</td></tr>
-  <tr><td><code>src/app/api/oauth/client-info/route.ts</code></td><td>Returns Client ID + Secret for display in settings</td></tr>
-  <tr><td><code>src/app/api/mcp/route.ts</code></td><td>The MCP server — validates token and exposes all five tools</td></tr>
+  <tr><td><code>src/app/api/mcp/route.ts</code></td><td>The MCP server — validates token and exposes all six tools</td></tr>
   <tr><td><code>src/app/settings/page.tsx</code></td><td>Settings page shell — auth guard + layout only</td></tr>
   <tr><td><code>src/app/settings/AiAccessCard.tsx</code></td><td>AI Assistant Access card — lists connected assistants with Disconnect button</td></tr>
   <tr><td><code>src/app/settings/PasswordCard.tsx</code></td><td>Update Password card</td></tr>
@@ -592,15 +592,15 @@ View the cron jobs in the Supabase dashboard under <strong>Database → Cron Job
 
 <table>
   <tr><th>Variable</th><th>Where used</th><th>Notes</th></tr>
-  <tr><td><code>OAUTH_CLIENT_ID</code></td><td>Authorize page, token route, client-info route</td><td>Public identifier for Claude as a client. Same value for all users. Generate once with <code>openssl rand -hex 16</code>.</td></tr>
-  <tr><td><code>OAUTH_CLIENT_SECRET</code></td><td>Token route, client-info route</td><td>Proves the token request is from Claude. Treat like a password — add to Vercel env vars, never commit to git. Generate with <code>openssl rand -hex 32</code>.</td></tr>
+  <tr><td><code>OAUTH_CLIENT_ID</code></td><td>Authorize page, token route</td><td>Public identifier for Claude as a client. Same value for all users. Generate once with <code>openssl rand -hex 16</code>.</td></tr>
+  <tr><td><code>OAUTH_CLIENT_SECRET</code></td><td>Token route</td><td>Proves the token request is from Claude. Treat like a password — add to Vercel env vars, never commit to git. Generate with <code>openssl rand -hex 32</code>.</td></tr>
   <tr><td><code>STRIPE_SECRET_KEY</code></td><td>MCP route (cancel, undo, subscribe tools)</td><td>Already required for the main billing flow. The MCP tools call Stripe directly to update subscriptions and create checkout sessions.</td></tr>
   <tr><td><code>STRIPE_WEATHER_PRICE_ID</code></td><td>MCP route (<code>subscribe</code> tool)</td><td>The Stripe price ID used when the subscribe tool creates a checkout session.</td></tr>
   <tr><td><code>NEXT_PUBLIC_APP_URL</code></td><td>MCP route (<code>subscribe</code> tool)</td><td>Used to build the success and cancel URLs for the Stripe checkout session.</td></tr>
 </table>
 
 <hr class="divider">
-<p style="color:#9ca3af;font-size:12px;text-align:center;">TrumpQuotes · OAuth 2.1 + PKCE + MCP Streamable HTTP · 5 tools · pg_cron cleanup</p>
+<p style="color:#9ca3af;font-size:12px;text-align:center;">TrumpQuotes · OAuth 2.1 + PKCE + MCP Streamable HTTP · 6 tools · pg_cron cleanup</p>
 
 </body>
 </html>
